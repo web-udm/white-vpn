@@ -42,6 +42,7 @@ src/
   - Запросы: `Get{Entity}{Detail}Query` (например `GetSubscriptionStatusQuery`)
   - Хэндлеры: `{CommandOrQuery}Handler`
 - Расширение `.yaml` (не `.yml`) для всех YAML-файлов
+- `new Class` без скобок (если нет аргументов): `new Foo`, не `new Foo()`
 
 ## TDD
 - **Сначала тест, потом реализация.** Red → Green → Refactor.
