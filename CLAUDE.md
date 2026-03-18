@@ -17,7 +17,8 @@ src/
 ├── Subscription/
 ├── Panel/              # 3x-ui интеграция
 ├── Telegram/           # Чистый адаптер, нет Domain
-└── Notification/
+├── Notification/
+└── Shared/             # Кросс-модульная инфраструктура
 ```
 
 ### Слои внутри модуля
@@ -40,6 +41,7 @@ src/
   - Команды: `{Action}{Entity}Command` (например `ApproveApplicationCommand`)
   - Запросы: `Get{Entity}{Detail}Query` (например `GetSubscriptionStatusQuery`)
   - Хэндлеры: `{CommandOrQuery}Handler`
+- Расширение `.yaml` (не `.yml`) для всех YAML-файлов
 
 ## TDD
 - **Сначала тест, потом реализация.** Red → Green → Refactor.
@@ -51,6 +53,9 @@ src/
 1. `php bin/phpunit` — все тесты должны проходить
 2. `vendor/bin/phpstan analyse src/` — 0 ошибок
 Если что-то падает — исправить до завершения.
+
+## Git
+- Формат коммитов: `feature: {краткое описание}`, `fix: ...`, `docs: ...`, `refactor: ...`
 
 ## OpenSpec
 Детальные спецификации: `openspec/specs/`

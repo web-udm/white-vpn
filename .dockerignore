@@ -1,0 +1,7 @@
+.git
+.idea
+var
+vendor
+node_modules
+openspec
+figma.png

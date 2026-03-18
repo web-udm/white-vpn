@@ -1,0 +1,22 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/franken/Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      APP_ENV: prod
+      SERVER_NAME: ":80"
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/franken/Dockerfile
+    environment:
+      APP_ENV: prod
+    command: php bin/console messenger:consume async --time-limit=3600
+    restart: unless-stopped
+    depends_on:
+      - app
