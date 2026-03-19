@@ -15,7 +15,7 @@ return new PhpCsFixer\Config()
         'ordered_imports' => ['sort_algorithm' => 'alpha'],
         'single_quote' => true,
         'trailing_comma_in_multiline' => true,
-        'new_with_parentheses' => ['anonymous_class' => true, 'named_class' => false],
+        'new_with_parentheses' => ['anonymous_class' => true, 'named_class' => true],
     ])
     ->setFinder($finder)
     ->setRiskyAllowed(true)

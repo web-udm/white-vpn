@@ -1,0 +1,2 @@
+parameters:
+    telegram.bot_token: '%env(BOT_TOKEN)%'

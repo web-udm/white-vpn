@@ -13,3 +13,8 @@ services:
     App\Shared\Infrastructure\Persistence\Doctrine\SqliteWalMiddleware:
         tags:
             - { name: doctrine.middleware }
+
+    SergiX44\Nutgram\Nutgram:
+        factory: ['App\Telegram\Infrastructure\NutgramFactory', 'create']
+        arguments:
+            $token: '%telegram.bot_token%'
