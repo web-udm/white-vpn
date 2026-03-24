@@ -4,7 +4,18 @@ doctrine:
 
     orm:
         naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
-        auto_mapping: true
+        auto_mapping: false
+        mappings:
+            User:
+                type: attribute
+                dir: '%kernel.project_dir%/src/User/Domain/Entity'
+                prefix: App\User\Domain\Entity
+                is_bundle: false
+            Subscription:
+                type: attribute
+                dir: '%kernel.project_dir%/src/Subscription/Domain/Entity'
+                prefix: App\Subscription\Domain\Entity
+                is_bundle: false
 
 when@prod:
     doctrine:

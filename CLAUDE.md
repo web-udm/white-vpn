@@ -15,9 +15,8 @@
 src/
 ├── User/
 ├── Subscription/
-├── Panel/              # 3x-ui интеграция
+├── VPN/                # VPN-провайдеры (3x-ui и др.)
 ├── Telegram/           # Чистый адаптер, нет Domain
-├── Notification/
 └── Shared/             # Кросс-модульная инфраструктура
 ```
 
@@ -32,6 +31,7 @@ src/
 - **Hexagonal**: порты (интерфейсы) в Domain, адаптеры в Infrastructure
 - **Telegram — адаптер**: без Domain слоя, вызывает Application других модулей через bus
 - **Межмодульное взаимодействие**: только через Domain Events или Command/Query Bus. Прямые вызовы запрещены.
+- **Modulite**: модули (кроме Shared) ничего не экспортируют (`export:` пуст). Вся коммуникация через bus.
 
 ## Стандарты кода
 - PSR-12 (PHP-CS-Fixer)
@@ -43,10 +43,16 @@ src/
   - Хэндлеры: `{CommandOrQuery}Handler`
 - Расширение `.yaml` (не `.yml`) для всех YAML-файлов
 - `new Class()` со скобками всегда: `new Foo()`, не `new Foo`
+- Порядок методов: публичные сверху, приватные снизу
+- Классы `final readonly` по умолчанию, если нет мутабельного состояния
+- Аббревиатуры пишутся БОЛЬШИМИ буквами: `VPN`, `API`, `URL`, `HTTP`, `ID` и т.д.
+- `try` должен быть в начале метода. Если try оказывается в середине — вынести блок в приватный метод.
 
-## TDD
-- **Сначала тест, потом реализация.** Red → Green → Refactor.
-- Domain/Application — unit-тесты (без фреймворка, без БД)
+## Тесты
+- **Сначала код, потом тесты.** Тесты пишутся после реализации.
+- Структура тестов: `// Arrange`, `// Act`, `// Assert`
+- Command/Query хэндлеры — integration-тесты через `KernelTestCase` (реальная SQLite), если нет особых причин для unit
+- Domain Value Objects — unit-тесты (валидация, equals)
 - Infrastructure — integration-тесты (реальная SQLite, mock HTTP)
 
 ## После завершения каждой фичи

@@ -12,4 +12,5 @@ framework:
             failed:
                 dsn: '%env(MESSENGER_TRANSPORT_DSN)%?queue_name=failed'
 
-        routing: {}
+        routing:
+            App\Telegram\Infrastructure\Command\NotifyAdminNewRequest\NotifyAdminNewRequestCommand: async

@@ -9,12 +9,16 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-final class WebhookController
+final readonly class WebhookController
 {
     #[Route('/webhook', methods: ['POST'])]
     public function __invoke(Request $request, WebhookProcessor $processor): Response
     {
-        $processor->process($request->getContent());
+        try {
+            $processor->process($request->getContent());
+        } catch (\Throwable) {
+            // Always return 200 to prevent Telegram from retrying and banning the webhook
+        }
 
         return new Response('', Response::HTTP_OK);
     }

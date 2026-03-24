@@ -1,0 +1,16 @@
+name: "@subscription"
+description: "Subscription management, connection requests"
+namespace: "App\\Subscription\\"
+
+export:
+  - "App\\Subscription\\Port\\"
+
+force-internal:
+
+require:
+  - "#doctrine/orm"
+  - "#doctrine/persistence"
+  - "#symfony/dependency-injection"
+  - "#symfony/messenger"
+
+allow-internal-access:

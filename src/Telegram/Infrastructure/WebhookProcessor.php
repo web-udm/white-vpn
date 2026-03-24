@@ -8,7 +8,7 @@ use SergiX44\Nutgram\Hydrator\Hydrator;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Common\Update;
 
-final class WebhookProcessor
+final readonly class WebhookProcessor
 {
     public function __construct(private readonly Nutgram $bot)
     {

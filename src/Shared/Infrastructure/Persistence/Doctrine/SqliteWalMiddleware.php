@@ -6,8 +6,10 @@ namespace App\Shared\Infrastructure\Persistence\Doctrine;
 
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Driver\Middleware;
+use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
-final class SqliteWalMiddleware implements Middleware
+#[AutoconfigureTag('doctrine.middleware')]
+final readonly class SqliteWalMiddleware implements Middleware
 {
     public function wrap(Driver $driver): Driver
     {

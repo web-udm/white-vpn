@@ -1,0 +1,17 @@
+name: "@telegram"
+description: "Telegram bot adapter, no domain layer"
+namespace: "App\\Telegram\\"
+
+export:
+
+force-internal:
+
+require:
+  - "#nutgram/nutgram"
+  - "#symfony/dependency-injection"
+  - "#symfony/http-foundation"
+  - "#symfony/http-kernel"
+  - "#symfony/messenger"
+  - "#symfony/routing"
+
+allow-internal-access:

@@ -1,0 +1,15 @@
+name: "@vpn"
+description: "VPN provider implementations (3x-ui, etc.)"
+namespace: "App\\VPN\\"
+
+export:
+  - "App\\VPN\\Port\\"
+
+force-internal:
+
+require:
+  - "#symfony/dependency-injection"
+  - "#symfony/http-client"
+  - "#symfony/messenger"
+
+allow-internal-access:

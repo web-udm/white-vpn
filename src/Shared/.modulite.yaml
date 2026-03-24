@@ -1,0 +1,12 @@
+name: "@shared"
+description: "Cross-module infrastructure"
+namespace: "App\\Shared\\"
+
+export:
+
+force-internal:
+
+require:
+  - "#doctrine/dbal"
+
+allow-internal-access:
