@@ -1,0 +1,15 @@
+whitevpn.tech {
+	reverse_proxy localhost:8080
+}
+
+dev.whitevpn.tech {
+	reverse_proxy localhost:8081
+}
+
+panel.whitevpn.tech {
+	reverse_proxy localhost:2053
+}
+
+sub.whitevpn.tech {
+	reverse_proxy localhost:2096
+}

@@ -1,28 +1,15 @@
 /.idea/
-/.env.local
-/.env.local.php
-/.env.*.local
-/var/
-/vendor/
-/.php-cs-fixer.cache
-/phpunit.xml
-###> symfony/framework-bundle ###
-.env
-/.env.local
-/.env.local.php
-/.env.*.local
-/config/secrets/prod/prod.decrypt.private.php
-/public/bundles/
-/var/
-/vendor/
-###< symfony/framework-bundle ###
+/.claude/
 
-###> friendsofphp/php-cs-fixer ###
-/.php-cs-fixer.php
-/.php-cs-fixer.cache
-###< friendsofphp/php-cs-fixer ###
-
-###> phpunit/phpunit ###
-/phpunit.xml
-/.phpunit.cache/
-###< phpunit/phpunit ###
+# telegram-bot
+/telegram-bot/.env
+/telegram-bot/.env.local
+/telegram-bot/.env.local.php
+/telegram-bot/.env.*.local
+/telegram-bot/var/
+/telegram-bot/vendor/
+/telegram-bot/.php-cs-fixer.cache
+/telegram-bot/phpunit.xml
+/telegram-bot/.phpunit.cache/
+/telegram-bot/config/secrets/prod/prod.decrypt.private.php
+/telegram-bot/public/bundles/

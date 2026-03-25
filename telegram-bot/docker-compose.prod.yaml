@@ -1,22 +1,29 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: docker/franken/Dockerfile
+    container_name: bot_prod_app
+    image: ghcr.io/web-udm/whitevpn-bot:prod
     ports:
-      - "80:80"
+      - "8080:80"
+    env_file: .env
     environment:
       APP_ENV: prod
       SERVER_NAME: ":80"
+    volumes:
+      - prod_data:/app/var
     restart: unless-stopped
 
   worker:
-    build:
-      context: .
-      dockerfile: docker/franken/Dockerfile
+    container_name: bot_prod_worker
+    image: ghcr.io/web-udm/whitevpn-bot:prod
+    env_file: .env
     environment:
       APP_ENV: prod
     command: php bin/console messenger:consume async --time-limit=3600
+    volumes:
+      - prod_data:/app/var
     restart: unless-stopped
     depends_on:
       - app
+
+volumes:
+  prod_data:
