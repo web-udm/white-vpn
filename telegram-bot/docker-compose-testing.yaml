@@ -9,7 +9,8 @@ services:
       - ./:/app
     environment:
       APP_ENV: test
-      SERVER_NAME: ":80"
+      SERVER_NAME:
+    command:
+        - php -d memory_limit=512M ./vendor/bin/phpstan analyse
+        - ./vendor/bin/phpunit
     tty: true
-
-
