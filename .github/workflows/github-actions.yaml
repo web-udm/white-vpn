@@ -19,3 +19,12 @@ jobs:
 
       - name: Build test container
         run: docker compose -f ./telegram-bot/docker-compose-testing.yaml up --remove-orphans -d --build
+
+      - name: Run PHPLint
+        run: docker exec bot_franken ./vendor/bin/phplint
+
+      - name: Run PHPStan
+        run: docker exec bot_franken php -d memory_limit=512M ./vendor/bin/phpstan analyse
+
+      - name: Run PHPUnit
+        run: docker exec bot_franken  ./vendor/bin/phpunit
