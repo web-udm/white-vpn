@@ -3,8 +3,8 @@ name: Test for Tg-bot
 on:
   push:
     branches: [master]
-    paths:
-      - telegram-bot
+    #paths:
+    #  - telegram-bot
   pull_request:
     branches: [master]
     paths:
@@ -19,6 +19,3 @@ jobs:
 
       - name: Build test container
         run: docker compose -f ./telegram-bot/docker-compose-testing.yaml up --remove-orphans -d --build
-
-
-
