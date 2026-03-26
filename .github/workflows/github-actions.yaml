@@ -17,11 +17,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Build test container
-        run: docker compose -f ./telegram-bot/docker-compose-testing.yaml up --remove-orphans -d --build
-
       - name: Run PHPStan
-        run: docker exec bot_franken php -d memory_limit=512M ./vendor/bin/phpstan analyse
+        run: docker compose -f ./telegram-bot/docker-compose-testing.yaml run --rm app php vendor/bin/phpstan analyse
 
       - name: Run PHPUnit
-        run: docker exec bot_franken  ./vendor/bin/phpunit
+        run: docker compose -f ./telegram-bot/docker-compose-testing.yaml run --rm app vendor/bin/phpunit
