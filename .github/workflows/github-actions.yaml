@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Run PHPStan
-        run: docker compose -f ./telegram-bot/docker-compose-testing.yaml run --rm app php vendor/bin/phpstan analyse
+        run: docker compose -f ./telegram-bot/docker-compose-testing.yaml run --rm app php vendor/bin/phpstan analyse --memory-limit=512M
 
       - name: Run PHPUnit
         run: docker compose -f ./telegram-bot/docker-compose-testing.yaml run --rm app vendor/bin/phpunit

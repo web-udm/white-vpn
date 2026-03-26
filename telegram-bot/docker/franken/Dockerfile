@@ -6,9 +6,13 @@ RUN install-php-extensions \
     intl \
     zip
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
 WORKDIR /app
+
+COPY composer.json composer.lock ./
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN composer install --no-interaction --prefer-dist --no-progress
+
+COPY . .
 
 COPY docker/franken/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 ENTRYPOINT ["docker-entrypoint"]
