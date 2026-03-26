@@ -1,0 +1,15 @@
+services:
+  app:
+    container_name: bot_franken
+    build:
+      context: .
+      dockerfile: docker/franken/Dockerfile
+      network: host
+    volumes:
+      - ./:/app
+    environment:
+      APP_ENV: test
+      SERVER_NAME: ":80"
+    tty: true
+
+
