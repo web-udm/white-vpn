@@ -13,3 +13,6 @@
 /telegram-bot/.phpunit.cache/
 /telegram-bot/config/secrets/prod/prod.decrypt.private.php
 /telegram-bot/public/bundles/
+
+# openspec
+openspec/
