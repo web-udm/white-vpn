@@ -83,9 +83,8 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          envs: GITHUB_TOKEN,GITHUB_ACTOR
           script: |
-            echo "$GITHUB_TOKEN" | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             cd /app/telegram-bot
             docker compose -f ${{ steps.vars.outputs.compose_file }} pull
             docker compose -f ${{ steps.vars.outputs.compose_file }} up -d
