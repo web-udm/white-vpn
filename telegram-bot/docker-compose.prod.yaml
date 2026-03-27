@@ -1,7 +1,7 @@
 services:
   app:
     container_name: bot_prod_app
-    image: ghcr.io/web-udm/whitevpn-bot:prod
+    image: ghcr.io/web-udm/white-vpn-bot:prod
     ports:
       - "8080:80"
     env_file: .env
@@ -14,7 +14,7 @@ services:
 
   worker:
     container_name: bot_prod_worker
-    image: ghcr.io/web-udm/whitevpn-bot:prod
+    image: ghcr.io/web-udm/white-vpn-bot:prod
     env_file: .env
     environment:
       APP_ENV: prod

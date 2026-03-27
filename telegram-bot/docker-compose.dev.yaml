@@ -1,7 +1,7 @@
 services:
   app:
     container_name: bot_dev_app
-    image: ghcr.io/web-udm/whitevpn-bot:dev
+    image: ghcr.io/web-udm/white-vpn-bot:dev
     ports:
       - "8081:80"
     env_file: .env.dev
@@ -14,7 +14,7 @@ services:
 
   worker:
     container_name: bot_dev_worker
-    image: ghcr.io/web-udm/whitevpn-bot:dev
+    image: ghcr.io/web-udm/white-vpn-bot:dev
     env_file: .env.dev
     environment:
       APP_ENV: dev
