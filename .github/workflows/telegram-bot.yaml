@@ -1,0 +1,93 @@
+name: Telegram Bot CI/CD
+
+on:
+  push:
+    branches: [master, dev]
+    paths:
+      - telegram-bot/**
+  workflow_dispatch:
+
+env:
+  IMAGE: ghcr.io/web-udm/white-vpn-bot
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run PHPStan
+        run: docker compose -f ./telegram-bot/docker-compose-testing.yaml run --rm app php vendor/bin/phpstan analyse --memory-limit=512M
+
+      - name: Run PHPUnit
+        run: docker compose -f ./telegram-bot/docker-compose-testing.yaml run --rm app vendor/bin/phpunit
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set image tag
+        id: tag
+        run: echo "tag=${{ github.ref_name == 'master' && 'prod' || 'dev' }}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./telegram-bot
+          file: ./telegram-bot/docker/franken/Dockerfile
+          push: true
+          tags: ${{ env.IMAGE }}:${{ steps.tag.outputs.tag }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment: ${{ github.ref_name == 'master' && 'production' || 'development' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set deploy vars
+        id: vars
+        run: |
+          if [ "${{ github.ref_name }}" = "master" ]; then
+            echo "compose_file=docker-compose.prod.yaml" >> "$GITHUB_OUTPUT"
+            echo "env_file=.env" >> "$GITHUB_OUTPUT"
+          else
+            echo "compose_file=docker-compose.dev.yaml" >> "$GITHUB_OUTPUT"
+            echo "env_file=.env.dev" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate .env file
+        run: echo "${{ secrets.ENV_FILE }}" > telegram-bot/${{ steps.vars.outputs.env_file }}
+
+      - name: Copy files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: telegram-bot/${{ steps.vars.outputs.compose_file }},telegram-bot/${{ steps.vars.outputs.env_file }}
+          target: /app
+          strip_components: 0
+
+      - name: Deploy
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd /app/telegram-bot
+            docker compose -f ${{ steps.vars.outputs.compose_file }} pull
+            docker compose -f ${{ steps.vars.outputs.compose_file }} up -d

@@ -1,9 +1,7 @@
 services:
   caddy:
     container_name: gateway_caddy
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/web-udm/white-vpn-gateway:latest
     volumes:
       - caddy_data:/data
       - caddy_config:/config
