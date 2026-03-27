@@ -1,10 +1,6 @@
 name: 3x-ui Deploy
 
 on:
-  push:
-    branches: [master]
-    paths:
-      - 3x-ui/**
   workflow_dispatch:
 
 jobs:

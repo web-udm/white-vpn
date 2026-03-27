@@ -1,10 +1,6 @@
 name: Telegram Bot CI/CD
 
 on:
-  push:
-    branches: [master, dev]
-    paths:
-      - telegram-bot/**
   workflow_dispatch:
 
 env:
