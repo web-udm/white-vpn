@@ -49,7 +49,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    environment: ${{ github.ref_name == 'master' && 'production' || 'development' }}
+    environment: ${{ github.ref_name == 'master' && 'production' || 'develop' }}
     steps:
       - uses: actions/checkout@v4
 
