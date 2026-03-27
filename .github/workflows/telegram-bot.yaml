@@ -12,6 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Create .env for tests
+        run: cp telegram-bot/.env.test telegram-bot/.env
+
       - name: Run PHPStan
         run: docker compose -f ./telegram-bot/docker-compose-testing.yaml run --rm app php vendor/bin/phpstan analyse --memory-limit=512M
 
