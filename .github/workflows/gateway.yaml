@@ -33,6 +33,8 @@ jobs:
           file: ./gateway/Dockerfile
           push: true
           tags: ${{ env.IMAGE }}:latest
+          cache-from: type=registry,ref=${{ env.IMAGE }}:cache
+          cache-to: type=registry,ref=${{ env.IMAGE }}:cache,mode=max
 
   deploy:
     runs-on: ubuntu-latest
