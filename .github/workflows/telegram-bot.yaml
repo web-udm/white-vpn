@@ -86,7 +86,7 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           source: telegram-bot/${{ steps.vars.outputs.compose_file }},telegram-bot/${{ steps.vars.outputs.env_file }}
           target: ${{ steps.vars.outputs.deploy_dir }}
-          strip_components: 1
+          strip_components: 0
 
       - name: Deploy
         uses: appleboy/ssh-action@v1
