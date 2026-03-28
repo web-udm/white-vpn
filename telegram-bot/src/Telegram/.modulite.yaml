@@ -7,11 +7,15 @@ export:
 force-internal:
 
 require:
-  - "#nutgram/nutgram"
-  - "#symfony/dependency-injection"
-  - "#symfony/http-foundation"
-  - "#symfony/http-kernel"
-  - "#symfony/messenger"
-  - "#symfony/routing"
+    - "@subscription"
+    - "@user"
+    - "@vpn"
+    - "#nutgram/nutgram"
+    - "#sergix44/container"
+    - "#symfony/console"
+    - "#symfony/dependency-injection"
+    - "#symfony/http-foundation"
+    - "#symfony/messenger"
+    - "#symfony/routing"
 
 allow-internal-access:

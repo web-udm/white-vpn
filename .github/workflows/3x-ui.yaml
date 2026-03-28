@@ -1,4 +1,4 @@
-name: 3x-ui Deploy
+name: 3x-ui CI/CD
 
 on:
   push:
