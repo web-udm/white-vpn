@@ -66,9 +66,11 @@ jobs:
           if [ "${{ github.ref_name }}" = "master" ]; then
             echo "compose_file=docker-compose.prod.yaml" >> "$GITHUB_OUTPUT"
             echo "env_file=.env" >> "$GITHUB_OUTPUT"
+            echo "deploy_dir=/app/telegram-bot-prod" >> "$GITHUB_OUTPUT"
           else
             echo "compose_file=docker-compose.dev.yaml" >> "$GITHUB_OUTPUT"
             echo "env_file=.env.dev" >> "$GITHUB_OUTPUT"
+            echo "deploy_dir=/app/telegram-bot-dev" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Generate .env file
@@ -81,8 +83,8 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           source: telegram-bot/${{ steps.vars.outputs.compose_file }},telegram-bot/${{ steps.vars.outputs.env_file }}
-          target: /app
-          strip_components: 0
+          target: ${{ steps.vars.outputs.deploy_dir }}
+          strip_components: 1
 
       - name: Deploy
         uses: appleboy/ssh-action@v1
@@ -92,6 +94,6 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            cd /app/telegram-bot
+            cd ${{ steps.vars.outputs.deploy_dir }}
             docker compose -f ${{ steps.vars.outputs.compose_file }} pull
             docker compose -f ${{ steps.vars.outputs.compose_file }} up -d
