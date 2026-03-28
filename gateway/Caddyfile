@@ -1,12 +1,15 @@
-whitevpn.tech {
+bot-prod.whitevpn.tech {
 	reverse_proxy localhost:8080
 }
 
-dev.whitevpn.tech {
+bot-dev.whitevpn.tech {
 	reverse_proxy localhost:8081
 }
 
 panel.whitevpn.tech {
+	basicauth {
+		admin $2a$14$VeniphkLgJEOC3Pq0tr9je6o2s5rVdMXiRDLQWXn9xpThpUUeNrR6
+	}
 	reverse_proxy localhost:2053
 }
 
