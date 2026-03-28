@@ -90,6 +90,7 @@ jobs:
           source: telegram-bot/${{ steps.vars.outputs.compose_file }},telegram-bot/${{ steps.vars.outputs.env_file }}
           target: ${{ steps.vars.outputs.deploy_dir }}
           strip_components: 0
+          debug: true
 
       - name: Deploy
         uses: appleboy/ssh-action@v1
