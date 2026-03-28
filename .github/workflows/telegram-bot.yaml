@@ -74,7 +74,7 @@ jobs:
           fi
 
       - name: Generate .env file
-        run: echo "${{ secrets.ENV_FILE }}" > telegram-bot/${{ steps.vars.outputs.env_file }}
+        run: echo "${{ secrets.ENV }}" > telegram-bot/${{ steps.vars.outputs.env_file }}
 
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
