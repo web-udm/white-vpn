@@ -33,4 +33,5 @@ jobs:
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             cd /app/3x-ui
             docker compose pull
-            docker compose up -d --force-recreate
+            docker compose down
+            docker compose up -d
