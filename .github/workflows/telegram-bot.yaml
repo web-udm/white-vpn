@@ -103,5 +103,5 @@ jobs:
           script: |
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             cd ${{ steps.vars.outputs.deploy_dir }}
-            docker compose -f ${{ steps.vars.outputs.compose_file }} pull
-            docker compose -f ${{ steps.vars.outputs.compose_file }} up -d
+            docker compose pull
+            docker compose up -d
