@@ -5,4 +5,7 @@ if [ "$APP_ENV" = "dev" ]; then
     composer install --no-interaction --prefer-source
 fi
 
+mkdir -p var/data
+php bin/console doctrine:migrations:migrate --no-interaction
+
 exec "$@"
