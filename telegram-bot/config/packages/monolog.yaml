@@ -1,0 +1,7 @@
+when@dev:
+    monolog:
+        handlers:
+            main:
+                type: stream
+                path: php://stderr
+                level: info

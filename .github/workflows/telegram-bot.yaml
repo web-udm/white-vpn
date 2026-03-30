@@ -80,8 +80,9 @@ jobs:
 
       - name: Prepare deploy files
         run: |
-          cp telegram-bot/${{ steps.vars.outputs.compose_file }} $RUNNER_TEMP/docker-compose.yaml
-          echo "${{ secrets.ENV }}" > $RUNNER_TEMP/${{ steps.vars.outputs.env_file }}
+          mkdir -p deploy
+          cp telegram-bot/${{ steps.vars.outputs.compose_file }} deploy/docker-compose.yaml
+          echo "${{ secrets.ENV }}" > deploy/${{ steps.vars.outputs.env_file }}
 
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
@@ -89,9 +90,9 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          source: ${{ runner.temp }}/docker-compose.yaml,${{ runner.temp }}/${{ steps.vars.outputs.env_file }}
+          source: deploy/docker-compose.yaml,deploy/${{ steps.vars.outputs.env_file }}
           target: ${{ steps.vars.outputs.deploy_dir }}
-          strip_components: 3
+          strip_components: 1
 
       - name: Deploy
         uses: appleboy/ssh-action@v1
@@ -102,5 +103,8 @@ jobs:
           script: |
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             cd ${{ steps.vars.outputs.deploy_dir }}
-            docker compose -f ${{ steps.vars.outputs.compose_file }} pull
-            docker compose -f ${{ steps.vars.outputs.compose_file }} up -d
+            docker compose pull
+            docker compose down
+            docker compose up -d
+            sleep 5
+            docker compose exec -T app sh -c "mkdir -p var/data && php bin/console doctrine:migrations:migrate --no-interaction"

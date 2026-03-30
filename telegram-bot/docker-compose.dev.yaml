@@ -4,12 +4,12 @@ services:
     image: ghcr.io/web-udm/white-vpn-bot:dev
     ports:
       - "8081:80"
-    env_file: .env.dev
     environment:
       APP_ENV: dev
       SERVER_NAME: ":80"
     volumes:
-      - dev_data:/app/var
+      - dev_data:/app/var/data
+      - .env.dev:/app/.env
     restart: unless-stopped
 
   worker:
@@ -20,7 +20,8 @@ services:
       APP_ENV: dev
     command: php bin/console messenger:consume async --time-limit=3600
     volumes:
-      - dev_data:/app/var
+      - dev_data:/app/var/data
+      - .env.dev:/app/.env
     restart: unless-stopped
     depends_on:
       - app
