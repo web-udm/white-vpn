@@ -8,7 +8,7 @@ services:
       APP_ENV: dev
       SERVER_NAME: ":80"
     volumes:
-      - dev_data:/app/var
+      - dev_data:/app/var/data
       - .env.dev:/app/.env
     restart: unless-stopped
 
@@ -20,7 +20,7 @@ services:
       APP_ENV: dev
     command: php bin/console messenger:consume async --time-limit=3600
     volumes:
-      - dev_data:/app/var
+      - dev_data:/app/var/data
       - .env.dev:/app/.env
     restart: unless-stopped
     depends_on:
