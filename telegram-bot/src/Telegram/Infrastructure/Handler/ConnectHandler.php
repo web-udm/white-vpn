@@ -31,12 +31,14 @@ final class ConnectHandler
         $this->registerUser($telegramId);
 
         if ($this->hasPendingRequest($telegramId)) {
-            $bot->answerCallbackQuery(text: 'Ваша заявка уже на рассмотрении. Ожидайте ответа.', show_alert: true);
+            $bot->answerCallbackQuery();
+            $bot->sendMessage('Ваша заявка уже на рассмотрении. Ожидайте ответа.');
             return;
         }
 
         if ($this->hasActiveSubscription($telegramId)) {
-            $bot->answerCallbackQuery(text: 'У вас уже есть активное подключение!', show_alert: true);
+            $bot->answerCallbackQuery();
+            $bot->sendMessage('У вас уже есть активное подключение!');
             return;
         }
 
