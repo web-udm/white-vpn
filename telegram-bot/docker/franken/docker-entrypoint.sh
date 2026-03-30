@@ -6,6 +6,9 @@ if [ "$APP_ENV" = "dev" ]; then
 fi
 
 mkdir -p var/data
-php bin/console doctrine:migrations:migrate --no-interaction
+
+if [ "$1" != "php" ]; then
+    php bin/console doctrine:migrations:migrate --no-interaction
+fi
 
 exec "$@"
