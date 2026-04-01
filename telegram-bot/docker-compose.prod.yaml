@@ -10,6 +10,7 @@ services:
       SERVER_NAME: ":80"
     volumes:
       - prod_data:/app/var/data
+      - .env:/app/.env
     restart: unless-stopped
 
   worker:
@@ -21,6 +22,7 @@ services:
     command: php bin/console messenger:consume async --time-limit=3600
     volumes:
       - prod_data:/app/var/data
+      - .env:/app/.env
     restart: unless-stopped
     depends_on:
       - app
