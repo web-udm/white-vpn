@@ -11,10 +11,12 @@ final readonly class MainMenu
     public const string STATUS = 'status';
     public const string SUPPORT = 'support';
 
+    public const string MENU_BUTTON_TEXT = '📋 Меню';
+
     public const array BUTTONS = [
-        self::CONNECT => 'Подключиться',
+        self::CONNECT => '🔗 Подключиться',
         self::BUY => 'Купить',
-        self::STATUS => 'Текущий статус',
-        self::SUPPORT => 'Поддержка',
+        self::STATUS => '📊 Текущий статус',
+        self::SUPPORT => '🆘 Поддержка',
     ];
 }

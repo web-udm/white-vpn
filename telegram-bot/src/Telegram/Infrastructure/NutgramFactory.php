@@ -7,6 +7,7 @@ namespace App\Telegram\Infrastructure;
 use App\Telegram\Infrastructure\Handler\AdminApproveHandler;
 use App\Telegram\Infrastructure\Handler\AdminRejectHandler;
 use App\Telegram\Infrastructure\Handler\ConnectHandler;
+use App\Telegram\Infrastructure\Handler\MenuHandler;
 use App\Telegram\Infrastructure\Handler\StartHandler;
 use App\Telegram\Infrastructure\Handler\StatusHandler;
 use App\Telegram\Infrastructure\Handler\SupportHandler;
@@ -20,6 +21,7 @@ final readonly class NutgramFactory
     public function __construct(
         #[Autowire('%telegram.bot_token%')] private string $token,
         private StartHandler $startHandler,
+        private MenuHandler $menuHandler,
         private ConnectHandler $connectHandler,
         private StatusHandler $statusHandler,
         private SupportHandler $supportHandler,
@@ -43,6 +45,7 @@ final readonly class NutgramFactory
         });
 
         $bot->onCommand('start', $this->startHandler);
+        $bot->onText(MainMenu::MENU_BUTTON_TEXT, $this->menuHandler);
         $bot->onCallbackQueryData(MainMenu::CONNECT, $this->connectHandler);
         $bot->onCallbackQueryData(MainMenu::STATUS, $this->statusHandler);
         $bot->onCallbackQueryData(MainMenu::SUPPORT, $this->supportHandler);
