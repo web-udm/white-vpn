@@ -17,12 +17,3 @@ doctrine:
                 prefix: App\Subscription\Domain\Entity
                 is_bundle: false
 
-when@prod:
-    doctrine:
-        orm:
-            query_cache_driver:
-                type: pool
-                pool: doctrine.system_cache_pool
-            result_cache_driver:
-                type: pool
-                pool: doctrine.result_cache_pool
