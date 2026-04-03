@@ -79,6 +79,41 @@ final class XuiVPNProvider
         );
     }
 
+    public function disableClient(string $subId): void
+    {
+        $email = $this->buildEmail($subId);
+        $clientResponse = $this->request('GET', '/panel/api/inbounds/getClientTraffics/' . $email);
+
+        if (!($clientResponse['success'] ?? false) || $clientResponse['obj'] === null) {
+            return;
+        }
+
+        $obj = $clientResponse['obj'];
+
+        $clientSettings = json_encode([
+            'clients' => [[
+                'id' => $obj['id'],
+                'email' => $email,
+                'limitIp' => $obj['limitIp'],
+                'totalGB' => $obj['total'],
+                'expiryTime' => $obj['expiryTime'],
+                'enable' => false,
+                'flow' => $obj['flow'] ?? '',
+                'tgId' => $obj['tgId'] ?? '',
+                'subId' => $subId,
+                'comment' => $obj['comment'] ?? '',
+                'reset' => $obj['reset'] ?? 0,
+            ]],
+        ], JSON_THROW_ON_ERROR);
+
+        $this->request('POST', '/panel/api/inbounds/updateClient/' . $obj['id'], [
+            'json' => [
+                'id' => $this->inboundId,
+                'settings' => $clientSettings,
+            ],
+        ]);
+    }
+
     public function getSubscriptionURL(string $subId): string
     {
         return rtrim($this->subscriptionUrl, '/') . '/sub/' . $subId;

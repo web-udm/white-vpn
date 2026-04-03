@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Telegram\Infrastructure\Handler;
 
-use App\Subscription\Domain\Entity\ConnectionRequest;
+use App\Subscription\Domain\Entity\SubscriptionRequest;
 use App\Subscription\Port\CreateConnectionRequestCommand;
 use App\Subscription\Port\HasActiveSubscriptionQuery;
 use App\Subscription\Port\HasPendingConnectionRequestQuery;
@@ -38,7 +38,7 @@ final class ConnectHandler
 
         if ($this->hasActiveSubscription($telegramId)) {
             $bot->answerCallbackQuery();
-            $bot->sendMessage('У вас уже есть активное подключение!');
+            $bot->sendMessage('У вас уже есть активная подписка! Нажмите «Получить VPN» чтобы получить конфиг.');
             return;
         }
 
@@ -62,7 +62,7 @@ final class ConnectHandler
 
     private function submitRequest(Nutgram $bot, int $telegramId): void
     {
-        /** @var ConnectionRequest $request */
+        /** @var SubscriptionRequest $request */
         $request = $this->handle(new CreateConnectionRequestCommand($telegramId));
 
         $bot->answerCallbackQuery();

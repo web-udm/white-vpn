@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Telegram\Infrastructure\Handler;
 
-use App\User\Domain\Repository\UserRepositoryInterface;
-use App\User\Domain\ValueObject\TelegramId;
-use App\VPN\Port\GetSubscriptionStatusQuery;
+use App\Subscription\Domain\Entity\Subscription;
+use App\Subscription\Domain\Entity\VPNConnection;
+use App\Subscription\Port\GetActiveSubscriptionQuery;
+use App\Subscription\Port\GetVPNConnectionsQuery;
 use App\VPN\Port\GetSubscriptionURLQuery;
-use App\VPN\Port\Subscription;
 use SergiX44\Nutgram\Nutgram;
 use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -17,12 +17,8 @@ final class StatusHandler
 {
     use HandleTrait;
 
-    private const string NO_CONNECTION = "Статус: НЕ АКТИВНА\n\nУ вас пока нет подключения. Нажмите «Подключиться» чтобы подать заявку.";
-
-    public function __construct(
-        MessageBusInterface $messageBus,
-        private readonly UserRepositoryInterface $userRepository,
-    ) {
+    public function __construct(MessageBusInterface $messageBus)
+    {
         $this->messageBus = $messageBus;
     }
 
@@ -33,78 +29,52 @@ final class StatusHandler
 
         $bot->answerCallbackQuery();
 
-        $subID = $this->resolveSubID($telegramId);
+        /** @var ?Subscription $subscription */
+        $subscription = $this->handle(new GetActiveSubscriptionQuery($telegramId));
 
-        if ($subID === null) {
-            $bot->sendMessage(self::NO_CONNECTION);
+        if ($subscription === null) {
+            $bot->sendMessage("Статус: НЕ АКТИВНА\n\nУ вас пока нет подписки. Нажмите «Подключиться» чтобы подать заявку.");
             return;
         }
 
-        $status = $this->fetchStatus($bot, $subID);
+        /** @var VPNConnection[] $connections */
+        $connections = $this->handle(new GetVPNConnectionsQuery($telegramId));
 
-        if ($status === null) {
-            return;
-        }
-
-        $bot->sendMessage($this->formatStatus($status, $subID));
+        $bot->sendMessage($this->formatStatus($subscription, $connections));
     }
 
-    private function resolveSubID(int $telegramId): ?string
+    /**
+     * @param VPNConnection[] $connections
+     */
+    private function formatStatus(Subscription $subscription, array $connections): string
     {
-        $user = $this->userRepository->findByTelegramId(new TelegramId($telegramId));
+        $quota = $subscription->getQuota();
+        $activeCount = count(array_filter($connections, fn(VPNConnection $c) => $c->isActive()));
+        $tier = $subscription->isVip() ? 'VIP' : 'Стандарт';
 
-        return $user?->getSubId();
-    }
+        $text = "Подписка: АКТИВНА\n";
+        $text .= "Тариф: {$tier}\n";
+        $text .= "Конфигов: {$activeCount}/{$quota}\n";
 
-    private function fetchStatus(Nutgram $bot, string $subID): ?Subscription
-    {
-        try {
-            /** @var ?Subscription $status */
-            $status = $this->handle(new GetSubscriptionStatusQuery($subID));
-        } catch (\Throwable) {
-            $bot->sendMessage('Сервис временно недоступен, попробуйте позже.');
-            return null;
+        if (empty($connections)) {
+            $text .= "\nУ вас пока нет конфигов. Нажмите «Получить VPN».";
+            return $text;
         }
 
-        if ($status === null) {
-            $bot->sendMessage(self::NO_CONNECTION);
+        $text .= "\nВаши подключения:\n";
+
+        foreach ($connections as $i => $connection) {
+            $num = $i + 1;
+            $status = $connection->isActive() ? 'активно' : 'отключено';
+
+            if ($connection->isActive()) {
+                /** @var string $url */
+                $url = $this->handle(new GetSubscriptionURLQuery($connection->getSubId()));
+                $text .= "\n#{$num} ({$status})\n{$url}\n";
+            } else {
+                $text .= "\n#{$num} ({$status})\n";
+            }
         }
-
-        return $status;
-    }
-
-    private function formatStatus(Subscription $status, string $subID): string
-    {
-        if ($status->isExpired()) {
-            $expiryDate = $status->expiryDate()?->format('d.m.Y') ?? '—';
-            return "Статус: ИСТЕКЛА\n\nДата окончания: $expiryDate";
-        }
-
-        if (!$status->enabled) {
-            return "Статус: ОТКЛЮЧЕНА\n\nОбратитесь в поддержку.";
-        }
-
-        return $this->formatActive($status, $subID);
-    }
-
-    private function formatActive(Subscription $status, string $subID): string
-    {
-        $remainingDays = $status->remainingDays();
-        $expiryDate = $status->expiryDate()?->format('d.m.Y');
-
-        /** @var string $subscriptionURL */
-        $subscriptionURL = $this->handle(new GetSubscriptionURLQuery($subID));
-
-        $text = "Статус: АКТИВНА\n";
-
-        if ($remainingDays !== null && $expiryDate !== null) {
-            $text .= "Осталось дней: $remainingDays\n";
-            $text .= "Дата окончания: $expiryDate\n";
-        } else {
-            $text .= "Срок действия: бессрочно\n";
-        }
-
-        $text .= "\nСсылка на подключение:\n$subscriptionURL";
 
         return $text;
     }

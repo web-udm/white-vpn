@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Subscription\Application\Command\CreateConnectionRequest;
 
 use App\Subscription\Application\Command\CreateConnectionRequest\CreateConnectionRequestCommandHandler;
+use App\Subscription\Infrastructure\Persistence\DoctrineSubscriptionRequestRepository;
 use App\Subscription\Port\CreateConnectionRequestCommand;
-use App\Subscription\Infrastructure\Persistence\DoctrineConnectionRequestRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -19,7 +19,7 @@ final class CreateConnectionRequestCommandHandlerTest extends KernelTestCase
         self::bootKernel();
 
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
-        $requestRepository = new DoctrineConnectionRequestRepository($entityManager);
+        $requestRepository = new DoctrineSubscriptionRequestRepository($entityManager);
         $this->handler = new CreateConnectionRequestCommandHandler($requestRepository);
     }
 

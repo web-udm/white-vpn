@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Subscription\Application\Query\HasPendingConnectionRequest;
 
-use App\Subscription\Domain\Repository\ConnectionRequestRepositoryInterface;
+use App\Subscription\Domain\Repository\SubscriptionRequestRepositoryInterface;
 use App\Subscription\Port\HasPendingConnectionRequestQuery;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -12,7 +12,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final readonly class HasPendingConnectionRequestQueryHandler
 {
     public function __construct(
-        private ConnectionRequestRepositoryInterface $requestRepository,
+        private SubscriptionRequestRepositoryInterface $requestRepository,
     ) {
     }
 

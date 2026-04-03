@@ -16,6 +16,7 @@ final readonly class MenuHandler
         $keyboard = InlineKeyboardMarkup::make()
             ->addRow(
                 InlineKeyboardButton::make(MainMenu::BUTTONS[MainMenu::CONNECT], callback_data: MainMenu::CONNECT),
+                InlineKeyboardButton::make(MainMenu::BUTTONS[MainMenu::GET_VPN], callback_data: MainMenu::GET_VPN),
             )
             ->addRow(
                 InlineKeyboardButton::make(MainMenu::BUTTONS[MainMenu::STATUS], callback_data: MainMenu::STATUS),

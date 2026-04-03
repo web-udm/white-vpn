@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Telegram\Infrastructure\Handler;
 
-use App\Subscription\Domain\Repository\ConnectionRequestRepositoryInterface;
+use App\Subscription\Domain\Repository\SubscriptionRequestRepositoryInterface;
 use App\Subscription\Port\ApproveConnectionRequestCommand;
 use SergiX44\Nutgram\Nutgram;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -17,7 +17,7 @@ final class AdminApproveHandler
 
     public function __construct(
         MessageBusInterface $messageBus,
-        private readonly ConnectionRequestRepositoryInterface $requestRepository,
+        private readonly SubscriptionRequestRepositoryInterface $requestRepository,
         #[Autowire('%telegram.admin_id%')] private readonly int $adminTelegramId,
     ) {
         $this->messageBus = $messageBus;
@@ -31,25 +31,23 @@ final class AdminApproveHandler
             return;
         }
 
-        $subscriptionUrl = $this->tryApprove($bot, $id);
-
-        if ($subscriptionUrl === null) {
+        if (!$this->tryApprove($bot, $id)) {
             return;
         }
 
         $bot->answerCallbackQuery(text: 'Заявка одобрена!');
         $bot->editMessageText("Заявка #{$id} — одобрена");
-        $this->notifyUser($bot, $id, $subscriptionUrl);
+        $this->notifyUser($bot, $id);
     }
 
-    private function tryApprove(Nutgram $bot, int $id): ?string
+    private function tryApprove(Nutgram $bot, int $id): bool
     {
         try {
-            /** @var string */
-            return $this->handle(new ApproveConnectionRequestCommand($id));
+            $this->handle(new ApproveConnectionRequestCommand($id));
+            return true;
         } catch (\Throwable $e) {
             $bot->answerCallbackQuery(text: "Ошибка: {$e->getMessage()}", show_alert: true);
-            return null;
+            return false;
         }
     }
 
@@ -64,13 +62,13 @@ final class AdminApproveHandler
         return false;
     }
 
-    private function notifyUser(Nutgram $bot, int $requestId, string $subscriptionUrl): void
+    private function notifyUser(Nutgram $bot, int $requestId): void
     {
         $request = $this->requestRepository->findById($requestId);
 
         if ($request !== null) {
             $bot->sendMessage(
-                text: "Ваша заявка одобрена! Добро пожаловать.\n\nСсылка на подключение:\n{$subscriptionUrl}",
+                text: "Ваша заявка одобрена! Добро пожаловать.\n\nНажмите кнопку «Получить VPN» чтобы получить конфигурацию подключения.",
                 chat_id: $request->getTelegramId(),
             );
         }

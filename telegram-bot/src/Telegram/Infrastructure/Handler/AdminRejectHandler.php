@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Telegram\Infrastructure\Handler;
 
-use App\Subscription\Domain\Repository\ConnectionRequestRepositoryInterface;
+use App\Subscription\Domain\Repository\SubscriptionRequestRepositoryInterface;
 use App\Subscription\Port\RejectConnectionRequestCommand;
 use SergiX44\Nutgram\Nutgram;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -17,7 +17,7 @@ final class AdminRejectHandler
 
     public function __construct(
         MessageBusInterface $messageBus,
-        private readonly ConnectionRequestRepositoryInterface $requestRepository,
+        private readonly SubscriptionRequestRepositoryInterface $requestRepository,
         #[Autowire('%telegram.admin_id%')] private readonly int $adminTelegramId,
     ) {
         $this->messageBus = $messageBus;

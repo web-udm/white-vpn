@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Subscription\Application\Command\ApproveConnectionRequest;
 
+use App\Subscription\Domain\Entity\SubscriptionRequest;
+use App\Subscription\Domain\Repository\SubscriptionRequestRepositoryInterface;
 use App\Subscription\Port\ApproveConnectionRequestCommand;
 use App\Subscription\Port\ConnectionRequestException;
-use App\Subscription\Domain\Entity\ConnectionRequest;
-use App\Subscription\Domain\Repository\ConnectionRequestRepositoryInterface;
+use App\Subscription\Port\CreateSubscriptionCommand;
 use App\User\Domain\Repository\UserRepositoryInterface;
 use App\User\Domain\ValueObject\TelegramId;
-use App\VPN\Port\CreateClientCommand;
-use App\VPN\Port\GetSubscriptionURLQuery;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -23,26 +22,24 @@ final class ApproveConnectionRequestCommandHandler
 
     public function __construct(
         MessageBusInterface $messageBus,
-        private readonly ConnectionRequestRepositoryInterface $requestRepository,
+        private readonly SubscriptionRequestRepositoryInterface $requestRepository,
         private readonly UserRepositoryInterface $userRepository,
     ) {
         $this->messageBus = $messageBus;
     }
 
-    public function __invoke(ApproveConnectionRequestCommand $command): string
+    public function __invoke(ApproveConnectionRequestCommand $command): void
     {
         $request = $this->findPendingRequest($command->requestID);
-        $subID = $this->resolveSubID($request->getTelegramId());
+        $userId = $this->resolveUserId($request->getTelegramId());
 
-        $this->handle(new CreateClientCommand($subID));
+        $this->handle(new CreateSubscriptionCommand($userId));
 
         $request->approve();
         $this->requestRepository->save($request);
-
-        return $this->handle(new GetSubscriptionURLQuery($subID));
     }
 
-    private function findPendingRequest(int $requestId): ConnectionRequest
+    private function findPendingRequest(int $requestId): SubscriptionRequest
     {
         $request = $this->requestRepository->findById($requestId);
 
@@ -57,7 +54,7 @@ final class ApproveConnectionRequestCommandHandler
         return $request;
     }
 
-    private function resolveSubID(int $telegramId): string
+    private function resolveUserId(int $telegramId): int
     {
         $user = $this->userRepository->findByTelegramId(new TelegramId($telegramId));
 
@@ -65,6 +62,6 @@ final class ApproveConnectionRequestCommandHandler
             throw new ConnectionRequestException('User not found');
         }
 
-        return $user->getSubId();
+        return $user->getId() ?? throw new ConnectionRequestException('User ID is null');
     }
 }

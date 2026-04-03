@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Subscription\Application\Command\RejectConnectionRequest;
 
+use App\Subscription\Domain\Entity\SubscriptionRequest;
+use App\Subscription\Domain\Repository\SubscriptionRequestRepositoryInterface;
 use App\Subscription\Port\ConnectionRequestException;
 use App\Subscription\Port\RejectConnectionRequestCommand;
-use App\Subscription\Domain\Entity\ConnectionRequest;
-use App\Subscription\Domain\Repository\ConnectionRequestRepositoryInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
 final readonly class RejectConnectionRequestCommandHandler
 {
     public function __construct(
-        private ConnectionRequestRepositoryInterface $requestRepository,
+        private SubscriptionRequestRepositoryInterface $requestRepository,
     ) {
     }
 
@@ -26,7 +26,7 @@ final readonly class RejectConnectionRequestCommandHandler
         $this->requestRepository->save($request);
     }
 
-    private function findPendingRequest(int $requestId): ConnectionRequest
+    private function findPendingRequest(int $requestId): SubscriptionRequest
     {
         $request = $this->requestRepository->findById($requestId);
 
