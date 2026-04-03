@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace App\Telegram\Infrastructure\Handler;
 
-use App\User\Domain\Repository\UserRepositoryInterface;
-use App\User\Domain\ValueObject\TelegramId;
-use App\VPN\Port\GetSubscriptionStatusQuery;
-use App\VPN\Port\GetSubscriptionURLQuery;
-use App\VPN\Port\Subscription;
+use App\Subscription\Port\GetActiveSubscriptionQuery;
+use App\Subscription\Port\SubscriptionStatus;
 use SergiX44\Nutgram\Nutgram;
 use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -17,12 +14,8 @@ final class StatusHandler
 {
     use HandleTrait;
 
-    private const string NO_CONNECTION = "Статус: НЕ АКТИВНА\n\nУ вас пока нет подключения. Нажмите «Подключиться» чтобы подать заявку.";
-
-    public function __construct(
-        MessageBusInterface $messageBus,
-        private readonly UserRepositoryInterface $userRepository,
-    ) {
+    public function __construct(MessageBusInterface $messageBus)
+    {
         $this->messageBus = $messageBus;
     }
 
@@ -33,78 +26,37 @@ final class StatusHandler
 
         $bot->answerCallbackQuery();
 
-        $subID = $this->resolveSubID($telegramId);
+        /** @var ?SubscriptionStatus $status */
+        $status = $this->handle(new GetActiveSubscriptionQuery($telegramId));
 
-        if ($subID === null) {
-            $bot->sendMessage(self::NO_CONNECTION);
-            return;
-        }
+        $bot->sendMessage($this->formatStatus($status));
+    }
 
-        $status = $this->fetchStatus($bot, $subID);
-
+    private function formatStatus(?SubscriptionStatus $status): string
+    {
         if ($status === null) {
-            return;
+            return "Статус: НЕ АКТИВНА\n\nУ вас пока нет подписки. Нажмите «Подключиться» чтобы подать заявку.";
         }
 
-        $bot->sendMessage($this->formatStatus($status, $subID));
+        return match ($status->status) {
+            'active' => $this->formatActive($status),
+            'paused' => "Статус: ПРИОСТАНОВЛЕНА\n\nОбратитесь в поддержку.",
+            'expired' => "Статус: ИСТЕКЛА\n\nОбратитесь в поддержку для продления.",
+            default => "Статус: НЕИЗВЕСТЕН",
+        };
     }
 
-    private function resolveSubID(int $telegramId): ?string
+    private function formatActive(SubscriptionStatus $status): string
     {
-        $user = $this->userRepository->findByTelegramId(new TelegramId($telegramId));
-
-        return $user?->getSubId();
-    }
-
-    private function fetchStatus(Nutgram $bot, string $subID): ?Subscription
-    {
-        try {
-            /** @var ?Subscription $status */
-            $status = $this->handle(new GetSubscriptionStatusQuery($subID));
-        } catch (\Throwable) {
-            $bot->sendMessage('Сервис временно недоступен, попробуйте позже.');
-            return null;
-        }
-
-        if ($status === null) {
-            $bot->sendMessage(self::NO_CONNECTION);
-        }
-
-        return $status;
-    }
-
-    private function formatStatus(Subscription $status, string $subID): string
-    {
-        if ($status->isExpired()) {
-            $expiryDate = $status->expiryDate()?->format('d.m.Y') ?? '—';
-            return "Статус: ИСТЕКЛА\n\nДата окончания: $expiryDate";
-        }
-
-        if (!$status->enabled) {
-            return "Статус: ОТКЛЮЧЕНА\n\nОбратитесь в поддержку.";
-        }
-
-        return $this->formatActive($status, $subID);
-    }
-
-    private function formatActive(Subscription $status, string $subID): string
-    {
-        $remainingDays = $status->remainingDays();
-        $expiryDate = $status->expiryDate()?->format('d.m.Y');
-
-        /** @var string $subscriptionURL */
-        $subscriptionURL = $this->handle(new GetSubscriptionURLQuery($subID));
-
         $text = "Статус: АКТИВНА\n";
 
-        if ($remainingDays !== null && $expiryDate !== null) {
-            $text .= "Осталось дней: $remainingDays\n";
-            $text .= "Дата окончания: $expiryDate\n";
+        if ($status->expiresAt !== null) {
+            $days = (int) (new \DateTimeImmutable())->diff($status->expiresAt)->days;
+            $text .= "Осталось дней: $days\n";
+            $text .= "Дата окончания: " . $status->expiresAt->format('d.m.Y') . "\n";
         } else {
             $text .= "Срок действия: бессрочно\n";
         }
-
-        $text .= "\nСсылка на подключение:\n$subscriptionURL";
 
         return $text;
     }
