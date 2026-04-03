@@ -41,6 +41,7 @@ src/
   - Команды: `{Action}{Entity}Command` (например `ApproveApplicationCommand`)
   - Запросы: `Get{Entity}{Detail}Query` (например `GetSubscriptionStatusQuery`)
   - Хэндлеры: `{CommandOrQuery}Handler`
+  - Таблицы БД: единственное число, с префиксом модуля: `subscription`, `subscription_request`, `vpn_connection`, `user`. Множественное число запрещено.
 - Расширение `.yaml` (не `.yml`) для всех YAML-файлов
 - `new Class()` со скобками всегда: `new Foo()`, не `new Foo`
 - Порядок методов: публичные сверху, приватные снизу
