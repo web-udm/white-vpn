@@ -4,6 +4,6 @@ declare(strict_types=1);
 
 namespace App\Subscription\Port;
 
-final class ConnectionRequestException extends \DomainException
+final class SubscriptionRequestException extends \DomainException
 {
 }

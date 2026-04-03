@@ -8,8 +8,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Webmozart\Assert\Assert;
 
 #[ORM\Entity]
-#[ORM\Table(name: 'connection_requests')]
-class ConnectionRequest
+#[ORM\Table(name: 'subscription_request')]
+class SubscriptionRequest
 {
     public const string STATUS_PENDING = 'pending';
     public const string STATUS_APPROVED = 'approved';

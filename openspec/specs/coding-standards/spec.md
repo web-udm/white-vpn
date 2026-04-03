@@ -14,6 +14,17 @@
 - **WHEN** создаётся новый PHP-файл
 - **THEN** первая строка после `<?php` — `declare(strict_types=1);`
 
+### Requirement: Именование таблиц БД
+Имена таблиц SHALL использовать единственное число и включать префикс модуля.
+
+- Формат: `{module}_{entity}` или просто `{entity}` если модуль один (например, `user`)
+- Примеры: `subscription`, `subscription_request`, `vpn_connection`, `user`
+- Запрещено: множественное число (`subscriptions`, `users`), отсутствие модульного префикса у связанных таблиц
+
+#### Scenario: Таблица для новой entity
+- **WHEN** создаётся новая Doctrine entity в модуле `Subscription`
+- **THEN** имя таблицы — `subscription` (для основной) или `subscription_request`, `subscription_log` и т.п. для связанных
+
 ### Requirement: Именование
 - Классы SHALL использовать PascalCase
 - Методы и переменные SHALL использовать camelCase
