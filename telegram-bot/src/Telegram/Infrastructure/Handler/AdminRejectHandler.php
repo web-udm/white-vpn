@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Telegram\Infrastructure\Handler;
 
-use App\Subscription\Domain\Repository\ConnectionRequestRepositoryInterface;
-use App\Subscription\Port\RejectConnectionRequestCommand;
+use App\Subscription\Domain\Repository\SubscriptionRequestRepositoryInterface;
+use App\Subscription\Port\RejectSubscriptionRequestCommand;
 use SergiX44\Nutgram\Nutgram;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Messenger\HandleTrait;
@@ -17,7 +17,7 @@ final class AdminRejectHandler
 
     public function __construct(
         MessageBusInterface $messageBus,
-        private readonly ConnectionRequestRepositoryInterface $requestRepository,
+        private readonly SubscriptionRequestRepositoryInterface $requestRepository,
         #[Autowire('%telegram.admin_id%')] private readonly int $adminTelegramId,
     ) {
         $this->messageBus = $messageBus;
@@ -54,7 +54,7 @@ final class AdminRejectHandler
     private function tryReject(Nutgram $bot, int $id): bool
     {
         try {
-            $this->handle(new RejectConnectionRequestCommand($id));
+            $this->handle(new RejectSubscriptionRequestCommand($id));
             return true;
         } catch (\Throwable $e) {
             $bot->answerCallbackQuery(text: "Ошибка: {$e->getMessage()}", show_alert: true);

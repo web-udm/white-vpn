@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Telegram\Infrastructure\Handler;
 
-use App\Subscription\Domain\Entity\ConnectionRequest;
-use App\Subscription\Port\CreateConnectionRequestCommand;
+use App\Subscription\Domain\Entity\SubscriptionRequest;
+use App\Subscription\Port\CreateSubscriptionRequestCommand;
 use App\Subscription\Port\HasActiveSubscriptionQuery;
-use App\Subscription\Port\HasPendingConnectionRequestQuery;
+use App\Subscription\Port\HasPendingSubscriptionRequestQuery;
 use App\Telegram\Infrastructure\Command\NotifyAdminNewRequest\NotifyAdminNewRequestCommand;
 use App\User\Port\RegisterUserCommand;
 use SergiX44\Nutgram\Nutgram;
 use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-final class ConnectHandler
+final class SubscriptionRequestHandler
 {
     use HandleTrait;
 
@@ -38,7 +38,7 @@ final class ConnectHandler
 
         if ($this->hasActiveSubscription($telegramId)) {
             $bot->answerCallbackQuery();
-            $bot->sendMessage('У вас уже есть активное подключение!');
+            $bot->sendMessage('У вас уже есть активная подписка.');
             return;
         }
 
@@ -52,7 +52,7 @@ final class ConnectHandler
 
     private function hasPendingRequest(int $telegramId): bool
     {
-        return $this->handle(new HasPendingConnectionRequestQuery($telegramId));
+        return $this->handle(new HasPendingSubscriptionRequestQuery($telegramId));
     }
 
     private function hasActiveSubscription(int $telegramId): bool
@@ -62,8 +62,8 @@ final class ConnectHandler
 
     private function submitRequest(Nutgram $bot, int $telegramId): void
     {
-        /** @var ConnectionRequest $request */
-        $request = $this->handle(new CreateConnectionRequestCommand($telegramId));
+        /** @var SubscriptionRequest $request */
+        $request = $this->handle(new CreateSubscriptionRequestCommand($telegramId));
 
         $bot->answerCallbackQuery();
         $bot->sendMessage('Заявка на подключение отправлена! Ожидайте подтверждения от администратора.');

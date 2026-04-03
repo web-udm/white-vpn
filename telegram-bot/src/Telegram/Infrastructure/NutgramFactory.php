@@ -6,7 +6,7 @@ namespace App\Telegram\Infrastructure;
 
 use App\Telegram\Infrastructure\Handler\AdminApproveHandler;
 use App\Telegram\Infrastructure\Handler\AdminRejectHandler;
-use App\Telegram\Infrastructure\Handler\ConnectHandler;
+use App\Telegram\Infrastructure\Handler\SubscriptionRequestHandler;
 use App\Telegram\Infrastructure\Handler\MenuHandler;
 use App\Telegram\Infrastructure\Handler\StartHandler;
 use App\Telegram\Infrastructure\Handler\StatusHandler;
@@ -22,7 +22,7 @@ final readonly class NutgramFactory
         #[Autowire('%telegram.bot_token%')] private string $token,
         private StartHandler $startHandler,
         private MenuHandler $menuHandler,
-        private ConnectHandler $connectHandler,
+        private SubscriptionRequestHandler $connectHandler,
         private StatusHandler $statusHandler,
         private SupportHandler $supportHandler,
         private AdminApproveHandler $adminApproveHandler,
