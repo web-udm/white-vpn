@@ -34,7 +34,7 @@ class Subscription
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
-    public function __construct(int $userId, bool $isVip = false, ?\DateTimeImmutable $expiresAt = null)
+    public function __construct(int $userId, \DateTimeImmutable $expiresAt, bool $isVip = false)
     {
         $this->userId = $userId;
         $this->isVip = $isVip;

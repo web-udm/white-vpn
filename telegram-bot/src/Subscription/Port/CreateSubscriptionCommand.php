@@ -6,7 +6,10 @@ namespace App\Subscription\Port;
 
 final readonly class CreateSubscriptionCommand
 {
-    public function __construct(public int $userId)
-    {
+    public function __construct(
+        public int $userId,
+        public \DateTimeImmutable $expiresAt,
+        public bool $isVip = false,
+    ) {
     }
 }

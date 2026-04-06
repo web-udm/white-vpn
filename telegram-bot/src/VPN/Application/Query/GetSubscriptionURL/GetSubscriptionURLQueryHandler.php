@@ -17,6 +17,6 @@ final readonly class GetSubscriptionURLQueryHandler
 
     public function __invoke(GetSubscriptionURLQuery $query): string
     {
-        return $this->vpnProvider->getSubscriptionURL($query->subID);
+        return $this->vpnProvider->getConnectionURL($query->subID);
     }
 }

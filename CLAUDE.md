@@ -48,6 +48,9 @@ src/
 - Классы `final readonly` по умолчанию, если нет мутабельного состояния
 - Аббревиатуры пишутся БОЛЬШИМИ буквами: `VPN`, `API`, `URL`, `HTTP`, `ID` и т.д.
 - `try` должен быть в начале метода. Если try оказывается в середине — вынести блок в приватный метод.
+- **Внешние ключи**: всегда добавлять FK-constraint в миграцию, когда колонка ссылается на другую таблицу. Указывать `ON DELETE CASCADE` / `ON DELETE SET NULL` где уместно. Пример: `CONSTRAINT FK_vpn_connection_subscription FOREIGN KEY (subscription_id) REFERENCES subscription(id) ON DELETE CASCADE`
+- **`#[ORM\Column]` без `type:`**: Doctrine автоматически определяет тип по PHP-типу свойства (`int`, `string`, `bool`, `\DateTimeImmutable` и т.д.). Явно указывать `type:` не нужно.
+- **Кросс-модульные ссылки**: между Bounded Context'ами ссылаться только по ID (int), не по объекту. `#[ORM\ManyToOne]` на Entity из другого модуля запрещён — это нарушение Modulite. FK на уровне БД (в миграции) при этом допустим.
 
 ## Тесты
 - **Сначала код, потом тесты.** Тесты пишутся после реализации.
