@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests\VPN\Application\Query\GetVpnConnectionURL;
 
+use App\Subscription\Application\Command\CreateSubscription\CreateSubscriptionCommandHandler;
+use App\Subscription\Infrastructure\Persistence\DoctrineSubscriptionRepository;
+use App\Subscription\Port\CreateSubscriptionCommand;
 use App\User\Application\Command\RegisterUser\RegisterUserCommandHandler;
 use App\User\Infrastructure\Persistence\DoctrineUserRepository;
 use App\User\Port\RegisterUserCommand;
@@ -21,6 +24,7 @@ final class GetVpnConnectionURLQueryHandlerTest extends KernelTestCase
     private GetVpnConnectionURLQueryHandler $handler;
     private DoctrineVpnConnectionRepository $vpnConnectionRepository;
     private RegisterUserCommandHandler $registerUserHandler;
+    private CreateSubscriptionCommandHandler $createSubscriptionHandler;
     private MockObject&VPNProviderInterface $vpnProvider;
 
     protected function setUp(): void
@@ -29,8 +33,10 @@ final class GetVpnConnectionURLQueryHandlerTest extends KernelTestCase
 
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $userRepository = new DoctrineUserRepository($entityManager);
+        $subscriptionRepository = new DoctrineSubscriptionRepository($entityManager);
         $this->vpnConnectionRepository = new DoctrineVpnConnectionRepository($entityManager);
         $this->registerUserHandler = new RegisterUserCommandHandler($userRepository);
+        $this->createSubscriptionHandler = new CreateSubscriptionCommandHandler($subscriptionRepository);
         $this->vpnProvider = $this->createMock(VPNProviderInterface::class);
 
         $this->handler = new GetVpnConnectionURLQueryHandler(
@@ -44,7 +50,8 @@ final class GetVpnConnectionURLQueryHandlerTest extends KernelTestCase
     {
         // Arrange
         $user = ($this->registerUserHandler)(new RegisterUserCommand(111222333));
-        $connection = new VpnConnection($user->getId(), 1, VpnConnection::PROTOCOL_VLESS, $user->getSubId(), 2);
+        $subscription = ($this->createSubscriptionHandler)(new CreateSubscriptionCommand($user->getId(), new \DateTimeImmutable('+30 days')));
+        $connection = new VpnConnection($subscription->getId(), VpnConnection::PROTOCOL_VLESS, $user->getSubId(), 2);
         $this->vpnConnectionRepository->save($connection);
 
         $this->vpnProvider
@@ -85,7 +92,8 @@ final class GetVpnConnectionURLQueryHandlerTest extends KernelTestCase
     {
         // Arrange
         $user = ($this->registerUserHandler)(new RegisterUserCommand(111222333));
-        $connection = new VpnConnection($user->getId(), 1, VpnConnection::PROTOCOL_VLESS, $user->getSubId(), 2);
+        $subscription = ($this->createSubscriptionHandler)(new CreateSubscriptionCommand($user->getId(), new \DateTimeImmutable('+30 days')));
+        $connection = new VpnConnection($subscription->getId(), VpnConnection::PROTOCOL_VLESS, $user->getSubId(), 2);
         $connection->revoke();
         $this->vpnConnectionRepository->save($connection);
 

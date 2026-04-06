@@ -23,9 +23,6 @@ class VpnConnection
     private int|null $id = null;
 
     #[ORM\Column]
-    private int $userId;
-
-    #[ORM\Column]
     private int $subscriptionId;
 
     #[ORM\Column(length: 20)]
@@ -44,13 +41,11 @@ class VpnConnection
     private \DateTimeImmutable $createdAt;
 
     public function __construct(
-        int $userId,
         int $subscriptionId,
         string $protocol,
         string $externalId,
         int $maxDevices,
     ) {
-        $this->userId = $userId;
         $this->subscriptionId = $subscriptionId;
         $this->protocol = $protocol;
         $this->externalId = $externalId;
@@ -62,11 +57,6 @@ class VpnConnection
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getUserId(): int
-    {
-        return $this->userId;
     }
 
     public function getSubscriptionId(): int

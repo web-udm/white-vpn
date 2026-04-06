@@ -8,7 +8,6 @@ final readonly class CreateVpnConnectionCommand
 {
     public function __construct(
         public int $subscriptionId,
-        public int $userId,
         public string $subId,
         public string $protocol,
         public int $maxDevices,

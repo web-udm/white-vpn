@@ -43,7 +43,6 @@ final class ApproveSubscriptionRequestCommandHandler
 
         $this->messageBus->dispatch(new CreateVpnConnectionCommand(
             subscriptionId: $subscription->getId() ?? throw new SubscriptionRequestException('Subscription has no ID'),
-            userId: $user->getId() ?? throw new SubscriptionRequestException('User has no ID'),
             subId: $user->getSubId(),
             protocol: VpnConnection::PROTOCOL_VLESS,
             maxDevices: $subscription->isVip() ? 10 : 1,

@@ -9,7 +9,6 @@ use App\Subscription\Port\CreateSubscriptionRequestCommand;
 use App\Subscription\Port\HasActiveSubscriptionQuery;
 use App\Subscription\Port\HasPendingSubscriptionRequestQuery;
 use App\Telegram\Infrastructure\Command\NotifyAdminNewRequest\NotifyAdminNewRequestCommand;
-use App\User\Port\RegisterUserCommand;
 use SergiX44\Nutgram\Nutgram;
 use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -28,8 +27,6 @@ final class SubscriptionRequestHandler
         /** @var int $telegramId guaranteed by middleware */
         $telegramId = $bot->userId();
 
-        $this->registerUser($telegramId);
-
         if ($this->hasPendingRequest($telegramId)) {
             $bot->answerCallbackQuery();
             $bot->sendMessage('Ваша заявка уже на рассмотрении. Ожидайте ответа.');
@@ -43,11 +40,6 @@ final class SubscriptionRequestHandler
         }
 
         $this->submitRequest($bot, $telegramId);
-    }
-
-    private function registerUser(int $telegramId): void
-    {
-        $this->handle(new RegisterUserCommand($telegramId));
     }
 
     private function hasPendingRequest(int $telegramId): bool
