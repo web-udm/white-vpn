@@ -1,6 +1,9 @@
 name: MySQL Deploy
 
 on:
+  push:
+    paths:
+      - mysql/**
   workflow_dispatch:
 
 jobs:
