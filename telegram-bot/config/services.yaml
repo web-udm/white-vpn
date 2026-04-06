@@ -13,7 +13,3 @@ services:
     SergiX44\Nutgram\Nutgram:
         factory: ['@App\Telegram\Infrastructure\NutgramFactory', 'create']
 
-when@test:
-    services:
-        App\Shared\Infrastructure\Persistence\Doctrine\SqliteWalMiddleware:
-            tags: []

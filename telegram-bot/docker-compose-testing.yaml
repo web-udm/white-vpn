@@ -9,3 +9,22 @@ services:
       APP_ENV: test
       SERVER_NAME:
     tty: true
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    container_name: bot_test_mysql
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: whitevpn
+      MYSQL_PASSWORD: secret
+      MYSQL_DATABASE: whitevpn_test
+    tmpfs:
+      - /var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10

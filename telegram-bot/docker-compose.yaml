@@ -15,6 +15,9 @@ services:
       APP_ENV: dev
       SERVER_NAME: ":80"
     tty: true
+    depends_on:
+      mysql:
+        condition: service_healthy
 
   worker:
     container_name: bot_worker
@@ -29,8 +32,26 @@ services:
     command: php bin/console messenger:consume async --time-limit=3600
     restart: on-failure
     depends_on:
-      - app
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    container_name: bot_mysql
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: whitevpn
+      MYSQL_PASSWORD: secret
+      MYSQL_DATABASE: whitevpn_dev
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 volumes:
   caddy_data:
   caddy_config:
+  mysql_data:
