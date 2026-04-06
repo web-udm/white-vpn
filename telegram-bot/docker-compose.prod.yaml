@@ -9,7 +9,6 @@ services:
       APP_ENV: prod
       SERVER_NAME: ":80"
     volumes:
-      - ./data:/app/var/data
       - .env:/app/.env
     restart: unless-stopped
 
@@ -21,8 +20,12 @@ services:
       APP_ENV: prod
     command: php bin/console messenger:consume async --time-limit=3600
     volumes:
-      - ./data:/app/var/data
       - .env:/app/.env
     restart: unless-stopped
     depends_on:
       - app
+
+networks:
+  default:
+    name: whitevpn_db
+    external: true

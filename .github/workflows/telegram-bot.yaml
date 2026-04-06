@@ -82,7 +82,7 @@ jobs:
         run: |
           mkdir -p deploy
           cp telegram-bot/${{ steps.vars.outputs.compose_file }} deploy/docker-compose.yaml
-          echo "${{ secrets.ENV }}" > deploy/${{ steps.vars.outputs.env_file }}
+          echo "${{ vars.ENV }}" > deploy/${{ steps.vars.outputs.env_file }}
 
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
