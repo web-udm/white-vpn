@@ -107,4 +107,4 @@ jobs:
             docker compose down
             docker compose up -d
             sleep 5
-            docker compose exec -T app sh -c "mkdir -p var/data && php bin/console doctrine:migrations:migrate --no-interaction"
+            docker compose exec -T app sh -c "php bin/console doctrine:migrations:migrate --no-interaction"
