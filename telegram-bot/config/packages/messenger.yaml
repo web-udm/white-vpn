@@ -14,3 +14,4 @@ framework:
 
         routing:
             App\Telegram\Infrastructure\Command\NotifyAdminNewRequest\NotifyAdminNewRequestCommand: async
+            App\VPN\Port\CreateVpnConnectionCommand: async

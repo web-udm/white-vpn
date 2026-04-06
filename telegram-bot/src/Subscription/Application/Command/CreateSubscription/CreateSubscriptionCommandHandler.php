@@ -19,7 +19,7 @@ final readonly class CreateSubscriptionCommandHandler
 
     public function __invoke(CreateSubscriptionCommand $command): Subscription
     {
-        $subscription = new Subscription($command->userId);
+        $subscription = new Subscription($command->userId, $command->expiresAt, $command->isVip);
         $this->subscriptionRepository->save($subscription);
 
         return $subscription;

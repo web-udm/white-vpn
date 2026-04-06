@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\VPN\Infrastructure\Xui;
 
+use App\VPN\Domain\VPNProviderInterface;
 use App\VPN\Port\Subscription;
 use App\VPN\Port\VPNException;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-final class XuiVPNProvider
+final class XuiVPNProvider implements VPNProviderInterface
 {
     private ?string $sessionCookie = null;
 
@@ -79,7 +80,7 @@ final class XuiVPNProvider
         );
     }
 
-    public function getSubscriptionURL(string $subId): string
+    public function getConnectionURL(string $subId): string
     {
         return rtrim($this->subscriptionUrl, '/') . '/sub/' . $subId;
     }

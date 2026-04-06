@@ -18,6 +18,9 @@ final readonly class MenuHandler
                 InlineKeyboardButton::make(MainMenu::BUTTONS[MainMenu::CONNECT], callback_data: MainMenu::CONNECT),
             )
             ->addRow(
+                InlineKeyboardButton::make(MainMenu::BUTTONS[MainMenu::GET_CONNECTION], callback_data: MainMenu::GET_CONNECTION),
+            )
+            ->addRow(
                 InlineKeyboardButton::make(MainMenu::BUTTONS[MainMenu::STATUS], callback_data: MainMenu::STATUS),
                 InlineKeyboardButton::make(MainMenu::BUTTONS[MainMenu::SUPPORT], callback_data: MainMenu::SUPPORT),
             );

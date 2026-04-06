@@ -16,4 +16,9 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Subscription/Domain/Entity'
                 prefix: App\Subscription\Domain\Entity
                 is_bundle: false
+            VPN:
+                type: attribute
+                dir: '%kernel.project_dir%/src/VPN/Domain/Entity'
+                prefix: App\VPN\Domain\Entity
+                is_bundle: false
 

@@ -60,7 +60,7 @@ final class HasActiveSubscriptionQueryHandlerTest extends KernelTestCase
     {
         // Arrange
         $user = ($this->registerUserHandler)(new RegisterUserCommand(111222333));
-        $subscription = new Subscription($user->getId());
+        $subscription = new Subscription($user->getId(), new \DateTimeImmutable('+30 days'));
         $this->subscriptionRepository->save($subscription);
 
         // Act
@@ -74,7 +74,7 @@ final class HasActiveSubscriptionQueryHandlerTest extends KernelTestCase
     {
         // Arrange
         $user = ($this->registerUserHandler)(new RegisterUserCommand(111222333));
-        $subscription = new Subscription($user->getId());
+        $subscription = new Subscription($user->getId(), new \DateTimeImmutable('+30 days'));
         $subscription->expire();
         $this->subscriptionRepository->save($subscription);
 
