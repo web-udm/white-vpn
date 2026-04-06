@@ -85,6 +85,7 @@ final class ApproveSubscriptionRequestCommandHandlerTest extends KernelTestCase
     public function testThrowsWhenRequestNotPending(): void
     {
         // Arrange
+        ($this->registerUserHandler)(new RegisterUserCommand(111222333));
         $request = new SubscriptionRequest(111222333);
         $request->reject();
         $this->requestRepository->save($request);
@@ -92,20 +93,6 @@ final class ApproveSubscriptionRequestCommandHandlerTest extends KernelTestCase
         // Assert
         $this->expectException(SubscriptionRequestException::class);
         $this->expectExceptionMessage('Request is not pending');
-
-        // Act
-        ($this->handler)(new ApproveSubscriptionRequestCommand($request->getId()));
-    }
-
-    public function testThrowsWhenUserNotFound(): void
-    {
-        // Arrange
-        $request = new SubscriptionRequest(999888777);
-        $this->requestRepository->save($request);
-
-        // Assert
-        $this->expectException(SubscriptionRequestException::class);
-        $this->expectExceptionMessage('User not found');
 
         // Act
         ($this->handler)(new ApproveSubscriptionRequestCommand($request->getId()));

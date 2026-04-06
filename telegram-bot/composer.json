@@ -30,7 +30,8 @@
         "friendsofphp/php-cs-fixer": "^3.0",
         "phpstan/phpstan": "^2.0",
         "phpunit/phpunit": "^11.0",
-        "symfony/debug-bundle": "8.0.*"
+        "symfony/debug-bundle": "8.0.*",
+        "symfony/maker-bundle": "^1.67"
     },
     "config": {
         "allow-plugins": {

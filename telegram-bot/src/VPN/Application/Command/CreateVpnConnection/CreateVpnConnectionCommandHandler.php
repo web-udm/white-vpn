@@ -26,7 +26,6 @@ final readonly class CreateVpnConnectionCommandHandler
         $this->vpnProvider->createClient($command->subId, $command->maxDevices, $expiryTimestamp);
 
         $connection = new VpnConnection(
-            $command->userId,
             $command->subscriptionId,
             $command->protocol,
             $command->subId,
