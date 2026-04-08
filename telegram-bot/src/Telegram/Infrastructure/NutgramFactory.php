@@ -14,6 +14,7 @@ use App\Telegram\Infrastructure\Handler\StartHandler;
 use App\Telegram\Infrastructure\Handler\StatusHandler;
 use App\Telegram\Infrastructure\Handler\SupportHandler;
 use App\Telegram\Infrastructure\Keyboard\MainMenu;
+use Psr\Log\LoggerInterface;
 use SergiX44\Nutgram\Configuration;
 use SergiX44\Nutgram\Nutgram;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -22,6 +23,7 @@ final readonly class NutgramFactory
 {
     public function __construct(
         #[Autowire('%telegram.bot_token%')] private string $token,
+        private LoggerInterface $logger,
         private StartHandler $startHandler,
         private MenuHandler $menuHandler,
         private SubscriptionRequestHandler $connectHandler,
@@ -46,6 +48,14 @@ final readonly class NutgramFactory
             if ($bot->userId() !== null) {
                 $next($bot);
             }
+        });
+
+        $bot->onException(function (Nutgram $bot, \Throwable $e): void {
+            $this->logger->error('Unhandled Nutgram exception', [
+                'message' => $e->getMessage(),
+                'class' => $e::class,
+                'file' => $e->getFile() . ':' . $e->getLine(),
+            ]);
         });
 
         $bot->onCommand('start', $this->startHandler);
