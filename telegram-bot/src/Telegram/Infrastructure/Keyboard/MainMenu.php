@@ -10,6 +10,8 @@ final readonly class MainMenu
     public const string BUY = 'buy';
     public const string STATUS = 'status';
     public const string SUPPORT = 'support';
+    public const string GET_CONNECTION = 'get_connection';
+    public const string CONNECTION_VLESS = 'connection_vless';
 
     public const string MENU_BUTTON_TEXT = '📋 Меню';
 
@@ -18,5 +20,6 @@ final readonly class MainMenu
         self::BUY => 'Купить',
         self::STATUS => '📊 Текущий статус',
         self::SUPPORT => '🆘 Поддержка',
+        self::GET_CONNECTION => '🔑 Получить подключение',
     ];
 }

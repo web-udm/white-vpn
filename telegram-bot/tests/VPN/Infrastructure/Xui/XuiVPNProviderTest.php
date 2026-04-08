@@ -112,7 +112,7 @@ final class XuiVPNProviderTest extends TestCase
         $provider = $this->createProvider([]);
 
         // Act
-        $url = $provider->getSubscriptionURL('some-uuid');
+        $url = $provider->getConnectionURL('some-uuid');
 
         // Assert
         $this->assertSame('https://sub.example.com/sub/some-uuid', $url);

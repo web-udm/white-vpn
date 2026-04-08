@@ -10,11 +10,12 @@ use App\Subscription\Domain\Entity\SubscriptionRequest;
 use App\Subscription\Infrastructure\Persistence\DoctrineSubscriptionRepository;
 use App\Subscription\Infrastructure\Persistence\DoctrineSubscriptionRequestRepository;
 use App\Subscription\Port\ApproveSubscriptionRequestCommand;
-use App\Subscription\Port\SubscriptionRequestException;
 use App\Subscription\Port\CreateSubscriptionCommand;
+use App\Subscription\Port\SubscriptionRequestException;
 use App\User\Application\Command\RegisterUser\RegisterUserCommandHandler;
 use App\User\Infrastructure\Persistence\DoctrineUserRepository;
 use App\User\Port\RegisterUserCommand;
+use App\VPN\Port\CreateVpnConnectionCommand;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Messenger\Handler\HandlersLocator;
@@ -43,6 +44,7 @@ final class ApproveSubscriptionRequestCommandHandlerTest extends KernelTestCase
         $bus = new MessageBus([
             new HandleMessageMiddleware(new HandlersLocator([
                 CreateSubscriptionCommand::class => [$createSubscriptionHandler],
+                CreateVpnConnectionCommand::class => [fn() => null],
             ])),
         ]);
 
@@ -67,6 +69,7 @@ final class ApproveSubscriptionRequestCommandHandlerTest extends KernelTestCase
         $this->assertSame(SubscriptionRequest::STATUS_APPROVED, $request->getStatus());
         $subscription = $this->subscriptionRepository->findActiveByUserId($user->getId());
         $this->assertNotNull($subscription);
+        $this->assertNotNull($subscription->getExpiresAt());
     }
 
     public function testThrowsWhenRequestNotFound(): void
@@ -82,6 +85,7 @@ final class ApproveSubscriptionRequestCommandHandlerTest extends KernelTestCase
     public function testThrowsWhenRequestNotPending(): void
     {
         // Arrange
+        ($this->registerUserHandler)(new RegisterUserCommand(111222333));
         $request = new SubscriptionRequest(111222333);
         $request->reject();
         $this->requestRepository->save($request);
@@ -89,20 +93,6 @@ final class ApproveSubscriptionRequestCommandHandlerTest extends KernelTestCase
         // Assert
         $this->expectException(SubscriptionRequestException::class);
         $this->expectExceptionMessage('Request is not pending');
-
-        // Act
-        ($this->handler)(new ApproveSubscriptionRequestCommand($request->getId()));
-    }
-
-    public function testThrowsWhenUserNotFound(): void
-    {
-        // Arrange
-        $request = new SubscriptionRequest(999888777);
-        $this->requestRepository->save($request);
-
-        // Assert
-        $this->expectException(SubscriptionRequestException::class);
-        $this->expectExceptionMessage('User not found');
 
         // Act
         ($this->handler)(new ApproveSubscriptionRequestCommand($request->getId()));

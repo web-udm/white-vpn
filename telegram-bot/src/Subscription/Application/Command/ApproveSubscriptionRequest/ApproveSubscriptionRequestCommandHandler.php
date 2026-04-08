@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace App\Subscription\Application\Command\ApproveSubscriptionRequest;
 
+use App\Subscription\Domain\Entity\Subscription;
 use App\Subscription\Domain\Entity\SubscriptionRequest;
 use App\Subscription\Domain\Repository\SubscriptionRequestRepositoryInterface;
 use App\Subscription\Port\ApproveSubscriptionRequestCommand;
-use App\Subscription\Port\SubscriptionRequestException;
 use App\Subscription\Port\CreateSubscriptionCommand;
+use App\Subscription\Port\SubscriptionRequestException;
+use App\User\Domain\Entity\User;
 use App\User\Domain\Repository\UserRepositoryInterface;
 use App\User\Domain\ValueObject\TelegramId;
+use App\VPN\Domain\Entity\VpnConnection;
+use App\VPN\Port\CreateVpnConnectionCommand;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -31,9 +35,19 @@ final class ApproveSubscriptionRequestCommandHandler
     public function __invoke(ApproveSubscriptionRequestCommand $command): void
     {
         $request = $this->findPendingRequest($command->requestID);
-        $userId = $this->resolveUserId($request->getTelegramId());
+        $user = $this->resolveUser($request->getTelegramId());
+        $expiresAt = new \DateTimeImmutable('+30 days');
 
-        $this->handle(new CreateSubscriptionCommand($userId));
+        /** @var Subscription $subscription */
+        $subscription = $this->handle(new CreateSubscriptionCommand($user->getId(), $expiresAt));
+
+        $this->messageBus->dispatch(new CreateVpnConnectionCommand(
+            subscriptionId: $subscription->getId() ?? throw new SubscriptionRequestException('Subscription has no ID'),
+            subId: $user->getSubId(),
+            protocol: VpnConnection::PROTOCOL_VLESS,
+            maxDevices: $subscription->isVip() ? 10 : 1,
+            expiresAt: $expiresAt,
+        ));
 
         $request->approve();
         $this->requestRepository->save($request);
@@ -54,7 +68,7 @@ final class ApproveSubscriptionRequestCommandHandler
         return $request;
     }
 
-    private function resolveUserId(int $telegramId): int
+    private function resolveUser(int $telegramId): User
     {
         $user = $this->userRepository->findByTelegramId(new TelegramId($telegramId));
 
@@ -62,6 +76,6 @@ final class ApproveSubscriptionRequestCommandHandler
             throw new SubscriptionRequestException('User not found');
         }
 
-        return $user->getId() ?? throw new SubscriptionRequestException('User has no ID');
+        return $user;
     }
 }

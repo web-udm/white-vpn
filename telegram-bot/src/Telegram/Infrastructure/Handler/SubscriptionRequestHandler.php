@@ -28,7 +28,7 @@ final class SubscriptionRequestHandler
         /** @var int $telegramId guaranteed by middleware */
         $telegramId = $bot->userId();
 
-        $this->registerUser($telegramId);
+        $this->handle(new RegisterUserCommand($telegramId));
 
         if ($this->hasPendingRequest($telegramId)) {
             $bot->answerCallbackQuery();
@@ -43,11 +43,6 @@ final class SubscriptionRequestHandler
         }
 
         $this->submitRequest($bot, $telegramId);
-    }
-
-    private function registerUser(int $telegramId): void
-    {
-        $this->handle(new RegisterUserCommand($telegramId));
     }
 
     private function hasPendingRequest(int $telegramId): bool

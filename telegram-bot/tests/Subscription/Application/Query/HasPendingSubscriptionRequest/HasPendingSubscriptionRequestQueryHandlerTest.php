@@ -8,6 +8,9 @@ use App\Subscription\Application\Query\HasPendingSubscriptionRequest\HasPendingS
 use App\Subscription\Domain\Entity\SubscriptionRequest;
 use App\Subscription\Infrastructure\Persistence\DoctrineSubscriptionRequestRepository;
 use App\Subscription\Port\HasPendingSubscriptionRequestQuery;
+use App\User\Application\Command\RegisterUser\RegisterUserCommandHandler;
+use App\User\Infrastructure\Persistence\DoctrineUserRepository;
+use App\User\Port\RegisterUserCommand;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -15,6 +18,7 @@ final class HasPendingSubscriptionRequestQueryHandlerTest extends KernelTestCase
 {
     private HasPendingSubscriptionRequestQueryHandler $handler;
     private DoctrineSubscriptionRequestRepository $requestRepository;
+    private RegisterUserCommandHandler $registerUserHandler;
 
     protected function setUp(): void
     {
@@ -22,7 +26,9 @@ final class HasPendingSubscriptionRequestQueryHandlerTest extends KernelTestCase
 
         $entityManager = self::getContainer()->get(EntityManagerInterface::class);
         $this->requestRepository = new DoctrineSubscriptionRequestRepository($entityManager);
+        $userRepository = new DoctrineUserRepository($entityManager);
         $this->handler = new HasPendingSubscriptionRequestQueryHandler($this->requestRepository);
+        $this->registerUserHandler = new RegisterUserCommandHandler($userRepository);
     }
 
     public function testReturnsFalseWhenNoPending(): void
@@ -37,6 +43,7 @@ final class HasPendingSubscriptionRequestQueryHandlerTest extends KernelTestCase
     public function testReturnsTrueWhenPendingExists(): void
     {
         // Arrange
+        ($this->registerUserHandler)(new RegisterUserCommand(111222333));
         $this->requestRepository->save(new SubscriptionRequest(111222333));
 
         // Act

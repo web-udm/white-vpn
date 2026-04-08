@@ -4,4 +4,4 @@ when@dev:
             main:
                 type: stream
                 path: php://stderr
-                level: info
+                level: error
