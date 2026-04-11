@@ -35,6 +35,7 @@ final readonly class GetActiveSubscriptionQueryHandler
         }
 
         return new SubscriptionStatus(
+            subscriptionId: $subscription->getId() ?? throw new \LogicException('Subscription has no ID'),
             status: $subscription->getStatus(),
             expiresAt: $subscription->getExpiresAt(),
         );

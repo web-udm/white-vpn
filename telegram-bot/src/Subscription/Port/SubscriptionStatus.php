@@ -11,6 +11,7 @@ final readonly class SubscriptionStatus
     public const string STATUS_EXPIRED = 'expired';
 
     public function __construct(
+        public int $subscriptionId,
         public string $status,
         public ?\DateTimeImmutable $expiresAt,
     ) {

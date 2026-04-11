@@ -7,7 +7,6 @@ namespace App\Telegram\Infrastructure;
 use App\Telegram\Infrastructure\Handler\AdminApproveHandler;
 use App\Telegram\Infrastructure\Handler\AdminRejectHandler;
 use App\Telegram\Infrastructure\Handler\ConnectionHandler;
-use App\Telegram\Infrastructure\Handler\ConnectionVlessHandler;
 use App\Telegram\Infrastructure\Handler\SubscriptionRequestHandler;
 use App\Telegram\Infrastructure\Handler\MenuHandler;
 use App\Telegram\Infrastructure\Handler\StartHandler;
@@ -32,7 +31,6 @@ final readonly class NutgramFactory
         private AdminApproveHandler $adminApproveHandler,
         private AdminRejectHandler $adminRejectHandler,
         private ConnectionHandler $connectionHandler,
-        private ConnectionVlessHandler $connectionVlessHandler,
     ) {
     }
 
@@ -64,7 +62,6 @@ final readonly class NutgramFactory
         $bot->onCallbackQueryData(MainMenu::STATUS, $this->statusHandler);
         $bot->onCallbackQueryData(MainMenu::SUPPORT, $this->supportHandler);
         $bot->onCallbackQueryData(MainMenu::GET_CONNECTION, $this->connectionHandler);
-        $bot->onCallbackQueryData(MainMenu::CONNECTION_VLESS, $this->connectionVlessHandler);
         $bot->onCallbackQueryData('approve_{requestId}', $this->adminApproveHandler);
         $bot->onCallbackQueryData('reject_{requestId}', $this->adminRejectHandler);
 
