@@ -22,28 +22,10 @@ final readonly class DoctrineVpnConnectionRepository implements VpnConnectionRep
         $this->em->flush();
     }
 
-    public function findBySubscriptionAndProtocol(int $subscriptionId, string $protocol): ?VpnConnection
+    public function findAllActiveBySubscriptionId(int $subscriptionId): array
     {
-        return $this->em->getRepository(VpnConnection::class)->findOneBy([
+        return $this->em->getRepository(VpnConnection::class)->findBy([
             'subscriptionId' => $subscriptionId,
-            'protocol' => $protocol,
         ]);
-    }
-
-    public function findActiveByUserIdAndProtocol(int $userId, string $protocol): ?VpnConnection
-    {
-        $id = $this->em->getConnection()->fetchOne(
-            'SELECT vc.id FROM vpn_connection vc
-             JOIN subscription s ON s.id = vc.subscription_id
-             WHERE s.user_id = :userId AND vc.protocol = :protocol AND vc.status = :status
-             LIMIT 1',
-            ['userId' => $userId, 'protocol' => $protocol, 'status' => VpnConnection::STATUS_ACTIVE],
-        );
-
-        if ($id === false) {
-            return null;
-        }
-
-        return $this->em->find(VpnConnection::class, $id);
     }
 }

@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\VPN\Port;
 
+use DateTimeImmutable;
+
 final readonly class CreateVpnConnectionCommand
 {
     public function __construct(
         public int $subscriptionId,
         public string $subId,
-        public string $protocol,
-        public int $maxDevices,
-        public \DateTimeImmutable $expiresAt,
+        public int $limitIp,
+        public DateTimeImmutable $expiresAt,
     ) {
     }
 }

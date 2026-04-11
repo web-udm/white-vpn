@@ -10,12 +10,8 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'vpn_connection')]
 class VpnConnection
 {
-    public const string PROTOCOL_VLESS = 'vless';
-    public const string PROTOCOL_WG = 'wg';
-    public const string PROTOCOL_HYSTERIA2 = 'hysteria2';
-
-    public const string STATUS_ACTIVE = 'active';
-    public const string STATUS_REVOKED = 'revoked';
+    public const string TYPE_SUBSCRIPTION = 'subscription';
+    public const string TYPE_WIREGUARD = 'wireguard';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -26,31 +22,22 @@ class VpnConnection
     private int $subscriptionId;
 
     #[ORM\Column(length: 20)]
-    private string $protocol;
+    private string $type;
 
     #[ORM\Column(length: 36)]
     private string $externalId;
-
-    #[ORM\Column]
-    private int $maxDevices;
-
-    #[ORM\Column(length: 20)]
-    private string $status;
 
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
     public function __construct(
         int $subscriptionId,
-        string $protocol,
+        string $type,
         string $externalId,
-        int $maxDevices,
     ) {
         $this->subscriptionId = $subscriptionId;
-        $this->protocol = $protocol;
+        $this->type = $type;
         $this->externalId = $externalId;
-        $this->maxDevices = $maxDevices;
-        $this->status = self::STATUS_ACTIVE;
         $this->createdAt = new \DateTimeImmutable();
     }
 
@@ -64,9 +51,9 @@ class VpnConnection
         return $this->subscriptionId;
     }
 
-    public function getProtocol(): string
+    public function getType(): string
     {
-        return $this->protocol;
+        return $this->type;
     }
 
     public function getExternalId(): string
@@ -74,23 +61,8 @@ class VpnConnection
         return $this->externalId;
     }
 
-    public function getMaxDevices(): int
-    {
-        return $this->maxDevices;
-    }
-
-    public function getStatus(): string
-    {
-        return $this->status;
-    }
-
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
-    }
-
-    public function revoke(): void
-    {
-        $this->status = self::STATUS_REVOKED;
     }
 }
