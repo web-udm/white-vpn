@@ -10,7 +10,6 @@ interface VpnConnectionRepositoryInterface
 {
     public function save(VpnConnection $connection): void;
 
-    public function findBySubscriptionAndProtocol(int $subscriptionId, string $protocol): ?VpnConnection;
-
-    public function findActiveByUserIdAndProtocol(int $userId, string $protocol): ?VpnConnection;
+    /** @return VpnConnection[] */
+    public function findAllActiveBySubscriptionId(int $subscriptionId): array;
 }

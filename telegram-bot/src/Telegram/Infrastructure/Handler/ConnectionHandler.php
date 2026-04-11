@@ -6,10 +6,8 @@ namespace App\Telegram\Infrastructure\Handler;
 
 use App\Subscription\Port\GetActiveSubscriptionQuery;
 use App\Subscription\Port\SubscriptionStatus;
-use App\Telegram\Infrastructure\Keyboard\MainMenu;
+use App\VPN\Port\GetVpnConnectionURLsQuery;
 use SergiX44\Nutgram\Nutgram;
-use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
-use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
 
@@ -37,11 +35,24 @@ final class ConnectionHandler
             return;
         }
 
-        $keyboard = InlineKeyboardMarkup::make()
-            ->addRow(
-                InlineKeyboardButton::make('VLESS', callback_data: MainMenu::CONNECTION_VLESS),
-            );
+        /** @var string[] $urls */
+        $urls = $this->handle(new GetVpnConnectionURLsQuery($telegramId));
 
-        $bot->sendMessage('Выберите протокол подключения:', reply_markup: $keyboard);
+        if ($urls === []) {
+            $bot->sendMessage('Подключение не найдено. Обратитесь в поддержку.');
+            return;
+        }
+
+        if (count($urls) === 1) {
+            $bot->sendMessage("Ваша ссылка для подключения:\n\n`{$urls[0]}`", parse_mode: 'Markdown');
+            return;
+        }
+
+        $lines = ["Ваши ссылки для подключения:\n"];
+        foreach ($urls as $i => $url) {
+            $lines[] = ($i + 1) . ". `$url`";
+        }
+
+        $bot->sendMessage(implode("\n", $lines), parse_mode: 'Markdown');
     }
 }

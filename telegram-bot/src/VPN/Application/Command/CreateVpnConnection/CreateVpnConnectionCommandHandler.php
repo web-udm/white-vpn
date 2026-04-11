@@ -23,13 +23,12 @@ final readonly class CreateVpnConnectionCommandHandler
     {
         $expiryTimestamp = $command->expiresAt->getTimestamp() * 1000;
 
-        $this->vpnProvider->createClient($command->subId, $command->maxDevices, $expiryTimestamp);
+        $this->vpnProvider->createClient($command->subId, $command->limitIp, $expiryTimestamp);
 
         $connection = new VpnConnection(
             $command->subscriptionId,
-            $command->protocol,
+            VpnConnection::TYPE_SUBSCRIPTION,
             $command->subId,
-            $command->maxDevices,
         );
 
         $this->vpnConnectionRepository->save($connection);

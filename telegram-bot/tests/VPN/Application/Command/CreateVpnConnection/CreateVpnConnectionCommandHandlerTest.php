@@ -61,24 +61,18 @@ final class CreateVpnConnectionCommandHandlerTest extends KernelTestCase
         ($this->handler)(new CreateVpnConnectionCommand(
             subscriptionId: $subscription->getId(),
             subId: $user->getSubId(),
-            protocol: VpnConnection::PROTOCOL_VLESS,
-            maxDevices: 1,
+            limitIp: 1,
             expiresAt: $expiresAt,
         ));
 
         // Assert
-        $connection = $this->vpnConnectionRepository->findActiveByUserIdAndProtocol(
-            $user->getId(),
-            VpnConnection::PROTOCOL_VLESS,
-        );
-
-        $this->assertNotNull($connection);
-        $this->assertSame(VpnConnection::STATUS_ACTIVE, $connection->getStatus());
-        $this->assertSame(1, $connection->getMaxDevices());
-        $this->assertSame($user->getSubId(), $connection->getExternalId());
+        $connections = $this->vpnConnectionRepository->findAllActiveBySubscriptionId($subscription->getId());
+        $this->assertCount(1, $connections);
+        $this->assertSame(VpnConnection::TYPE_SUBSCRIPTION, $connections[0]->getType());
+        $this->assertSame($user->getSubId(), $connections[0]->getExternalId());
     }
 
-    public function testVipUserGetsHigherMaxDevices(): void
+    public function testVipUserGetsHigherLimitIp(): void
     {
         // Arrange
         $user = ($this->registerUserHandler)(new RegisterUserCommand(444555666));
@@ -94,18 +88,12 @@ final class CreateVpnConnectionCommandHandlerTest extends KernelTestCase
         ($this->handler)(new CreateVpnConnectionCommand(
             subscriptionId: $subscription->getId(),
             subId: $user->getSubId(),
-            protocol: VpnConnection::PROTOCOL_VLESS,
-            maxDevices: 10,
+            limitIp: 10,
             expiresAt: $expiresAt,
         ));
 
         // Assert
-        $connection = $this->vpnConnectionRepository->findActiveByUserIdAndProtocol(
-            $user->getId(),
-            VpnConnection::PROTOCOL_VLESS,
-        );
-
-        $this->assertNotNull($connection);
-        $this->assertSame(10, $connection->getMaxDevices());
+        $connections = $this->vpnConnectionRepository->findAllActiveBySubscriptionId($subscription->getId());
+        $this->assertCount(1, $connections);
     }
 }
