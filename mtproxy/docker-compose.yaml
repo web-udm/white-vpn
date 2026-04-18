@@ -1,0 +1,18 @@
+services:
+  mtproxy:
+    image: telegrammessenger/proxy:2f76936
+    container_name: mtproxy_app
+    entrypoint: ["/bin/sh", "/entrypoint.sh"]
+    volumes:
+      - ./secrets.txt:/data/secrets.txt:ro
+      - ./entrypoint.sh:/entrypoint.sh:ro
+      - mtproxy_data:/data
+    environment:
+      MTPROXY_PORT: "${MTPROXY_PORT:-8443}"
+      AD_TAG: "${AD_TAG:-}"
+    network_mode: host
+    restart: unless-stopped
+
+
+volumes:
+  mtproxy_data:

@@ -15,10 +15,10 @@ final readonly class MainMenu
     public const string MENU_BUTTON_TEXT = '📋 Меню';
 
     public const array BUTTONS = [
-        self::CONNECT => '🔗 Подключиться',
+        self::CONNECT => '📋 Подписка',
         self::BUY => 'Купить',
         self::STATUS => '📊 Текущий статус',
         self::SUPPORT => '🆘 Поддержка',
-        self::GET_CONNECTION => '🔑 Получить подключение',
+        self::GET_CONNECTION => '🔑 Мои подключения',
     ];
 }

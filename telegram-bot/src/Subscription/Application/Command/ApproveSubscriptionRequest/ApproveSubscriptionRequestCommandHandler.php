@@ -13,6 +13,7 @@ use App\Subscription\Port\SubscriptionRequestException;
 use App\User\Domain\Entity\User;
 use App\User\Domain\Repository\UserRepositoryInterface;
 use App\User\Domain\ValueObject\TelegramId;
+use App\VPN\Port\CreateMtProxyConnectionCommand;
 use App\VPN\Port\CreateVpnConnectionCommand;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\HandleTrait;
@@ -40,11 +41,17 @@ final class ApproveSubscriptionRequestCommandHandler
         /** @var Subscription $subscription */
         $subscription = $this->handle(new CreateSubscriptionCommand($user->getId(), $expiresAt));
 
+        $subscriptionId = $subscription->getId() ?? throw new SubscriptionRequestException('Subscription has no ID');
+
         $this->messageBus->dispatch(new CreateVpnConnectionCommand(
-            subscriptionId: $subscription->getId() ?? throw new SubscriptionRequestException('Subscription has no ID'),
+            subscriptionId: $subscriptionId,
             subId: $user->getSubId(),
             limitIp: $subscription->isVip() ? 10 : 1,
             expiresAt: $expiresAt,
+        ));
+
+        $this->messageBus->dispatch(new CreateMtProxyConnectionCommand(
+            subscriptionId: $subscriptionId,
         ));
 
         $request->approve();

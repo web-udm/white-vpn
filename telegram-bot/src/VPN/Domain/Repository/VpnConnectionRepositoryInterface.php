@@ -12,4 +12,9 @@ interface VpnConnectionRepositoryInterface
 
     /** @return VpnConnection[] */
     public function findAllActiveBySubscriptionId(int $subscriptionId): array;
+
+    /** @return string[] */
+    public function findAllActiveMtProxySecrets(): array;
+
+    public function hasMtProxyConnection(int $subscriptionId): bool;
 }

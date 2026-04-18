@@ -68,7 +68,7 @@ final class AdminApproveHandler
 
         if ($request !== null) {
             $bot->sendMessage(
-                text: 'Ваша заявка одобрена! Добро пожаловать.',
+                text: "Ваша заявка одобрена! Добро пожаловать.\n\nMTProxy (резервный доступ к Telegram) будет активен в течение 5 минут.",
                 chat_id: $request->getTelegramId(),
             );
         }

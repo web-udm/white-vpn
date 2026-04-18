@@ -19,3 +19,6 @@
 openspec/
 
 mount-db.sh
+
+# mtproxy
+/mtproxy/secrets.txt
