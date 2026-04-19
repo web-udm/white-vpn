@@ -69,7 +69,7 @@ final class GetVpnConnectionURLsQueryHandler
     {
         if ($connection->getType() === VpnConnection::TYPE_MTPROXY) {
             return sprintf(
-                'tg://proxy?server=%s&port=%d&secret=dd%s',
+                'https://t.me/proxy?server=%s&port=%d&secret=dd%s',
                 $this->mtproxyHost,
                 $this->mtproxyPort,
                 $connection->getExternalId(),

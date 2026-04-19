@@ -43,8 +43,8 @@ final class ConnectionHandler
             return;
         }
 
-        $vpnUrls = array_values(array_filter($urls, fn ($u) => !str_starts_with($u, 'tg://proxy?')));
-        $mtproxyUrls = array_values(array_filter($urls, fn ($u) => str_starts_with($u, 'tg://')));
+        $vpnUrls = array_values(array_filter($urls, fn ($u) => !str_starts_with($u, 'https://t.me/proxy?')));
+        $mtproxyUrls = array_values(array_filter($urls, fn ($u) => str_starts_with($u, 'https://t.me/proxy?')));
 
         $lines = [];
 
