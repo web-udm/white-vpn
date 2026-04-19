@@ -12,6 +12,7 @@ class VpnConnection
 {
     public const string TYPE_SUBSCRIPTION = 'subscription';
     public const string TYPE_WIREGUARD = 'wireguard';
+    public const string TYPE_MTPROXY = 'mtproxy';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]

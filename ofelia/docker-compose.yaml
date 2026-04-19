@@ -1,0 +1,11 @@
+services:
+  ofelia:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ofelia
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config.ini:/etc/ofelia/config.ini:ro
+    restart: unless-stopped
+    command: daemon --config /etc/ofelia/config.ini

@@ -12,10 +12,12 @@ use App\Subscription\Port\GetActiveSubscriptionQuery;
 use App\User\Application\Command\RegisterUser\RegisterUserCommandHandler;
 use App\User\Infrastructure\Persistence\DoctrineUserRepository;
 use App\User\Port\RegisterUserCommand;
+use App\VPN\Application\Command\CreateMtProxyConnection\CreateMtProxyConnectionCommandHandler;
 use App\VPN\Application\Query\GetVpnConnectionURLs\GetVpnConnectionURLsQueryHandler;
 use App\VPN\Domain\Entity\VpnConnection;
 use App\VPN\Domain\VPNProviderInterface;
 use App\VPN\Infrastructure\Persistence\DoctrineVpnConnectionRepository;
+use App\VPN\Port\CreateMtProxyConnectionCommand;
 use App\VPN\Port\GetVpnConnectionURLsQuery;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -44,14 +46,13 @@ final class GetVpnConnectionURLsQueryHandlerTest extends KernelTestCase
         $this->createSubscriptionHandler = new CreateSubscriptionCommandHandler($subscriptionRepository);
         $this->vpnProvider = $this->createMock(VPNProviderInterface::class);
 
-        $getActiveSubscriptionHandler = new GetActiveSubscriptionQueryHandler(
-            $subscriptionRepository,
-            $userRepository,
-        );
+        $getActiveSubscriptionHandler = new GetActiveSubscriptionQueryHandler($subscriptionRepository, $userRepository);
+        $createMtProxyHandler = new CreateMtProxyConnectionCommandHandler($this->vpnConnectionRepository);
 
         $bus = new MessageBus([
             new HandleMessageMiddleware(new HandlersLocator([
                 GetActiveSubscriptionQuery::class => [$getActiveSubscriptionHandler],
+                CreateMtProxyConnectionCommand::class => [$createMtProxyHandler],
             ])),
         ]);
 
@@ -59,10 +60,12 @@ final class GetVpnConnectionURLsQueryHandlerTest extends KernelTestCase
             $bus,
             $this->vpnProvider,
             $this->vpnConnectionRepository,
+            'whitevpn.tech',
+            8443,
         );
     }
 
-    public function testReturnsURLsWhenConnectionsExist(): void
+    public function testReturnsVpnAndMtProxyURLs(): void
     {
         // Arrange
         $user = ($this->registerUserHandler)(new RegisterUserCommand(111222333));
@@ -79,12 +82,13 @@ final class GetVpnConnectionURLsQueryHandlerTest extends KernelTestCase
         // Act
         $urls = ($this->handler)(new GetVpnConnectionURLsQuery(111222333));
 
-        // Assert
-        $this->assertCount(1, $urls);
+        // Assert — VPN + MTProxy (created lazily)
+        $this->assertCount(2, $urls);
         $this->assertSame('https://vpn.example.com/sub/' . $user->getSubId(), $urls[0]);
+        $this->assertStringStartsWith('tg://proxy?', $urls[1]);
     }
 
-    public function testReturnsMultipleURLsForMultipleConnections(): void
+    public function testReturnsAllVpnURLsPlusMtProxy(): void
     {
         // Arrange
         $user = ($this->registerUserHandler)(new RegisterUserCommand(111222333));
@@ -102,8 +106,47 @@ final class GetVpnConnectionURLsQueryHandlerTest extends KernelTestCase
         // Act
         $urls = ($this->handler)(new GetVpnConnectionURLsQuery(111222333));
 
-        // Assert
-        $this->assertCount(2, $urls);
+        // Assert — 2 VPN + 1 MTProxy
+        $this->assertCount(3, $urls);
+    }
+
+    public function testCreatesMtProxyLazilyWhenMissing(): void
+    {
+        // Arrange
+        $user = ($this->registerUserHandler)(new RegisterUserCommand(111222333));
+        $subscription = ($this->createSubscriptionHandler)(new CreateSubscriptionCommand($user->getId(), new \DateTimeImmutable('+30 days')));
+        $connection = new VpnConnection($subscription->getId(), VpnConnection::TYPE_SUBSCRIPTION, $user->getSubId());
+        $this->vpnConnectionRepository->save($connection);
+
+        $this->vpnProvider->method('getConnectionURL')->willReturn('https://vpn.example.com');
+
+        // Act
+        ($this->handler)(new GetVpnConnectionURLsQuery(111222333));
+
+        // Assert — MTProxy connection now exists in DB
+        $connections = $this->vpnConnectionRepository->findAllActiveBySubscriptionId($subscription->getId());
+        $types = array_map(fn ($c) => $c->getType(), $connections);
+        $this->assertContains(VpnConnection::TYPE_MTPROXY, $types);
+    }
+
+    public function testDoesNotDuplicateMtProxyOnRepeatCall(): void
+    {
+        // Arrange
+        $user = ($this->registerUserHandler)(new RegisterUserCommand(111222333));
+        $subscription = ($this->createSubscriptionHandler)(new CreateSubscriptionCommand($user->getId(), new \DateTimeImmutable('+30 days')));
+        $connection = new VpnConnection($subscription->getId(), VpnConnection::TYPE_SUBSCRIPTION, $user->getSubId());
+        $this->vpnConnectionRepository->save($connection);
+
+        $this->vpnProvider->method('getConnectionURL')->willReturn('https://vpn.example.com');
+
+        // Act — два вызова подряд
+        ($this->handler)(new GetVpnConnectionURLsQuery(111222333));
+        ($this->handler)(new GetVpnConnectionURLsQuery(111222333));
+
+        // Assert — MTProxy создан ровно один раз
+        $connections = $this->vpnConnectionRepository->findAllActiveBySubscriptionId($subscription->getId());
+        $mtproxyCount = count(array_filter($connections, fn ($c) => $c->getType() === VpnConnection::TYPE_MTPROXY));
+        $this->assertSame(1, $mtproxyCount);
     }
 
     public function testReturnsEmptyArrayWhenUserNotFound(): void
@@ -127,16 +170,22 @@ final class GetVpnConnectionURLsQueryHandlerTest extends KernelTestCase
         $this->assertSame([], $urls);
     }
 
-    public function testReturnsEmptyArrayWhenNoConnections(): void
+    public function testReturnsMtProxyURLWithCorrectFormat(): void
     {
         // Arrange
         $user = ($this->registerUserHandler)(new RegisterUserCommand(111222333));
-        ($this->createSubscriptionHandler)(new CreateSubscriptionCommand($user->getId(), new \DateTimeImmutable('+30 days')));
+        $subscription = ($this->createSubscriptionHandler)(new CreateSubscriptionCommand($user->getId(), new \DateTimeImmutable('+30 days')));
+        $secret = 'aabbccdd11223344aabbccdd11223344';
+        $connection = new VpnConnection($subscription->getId(), VpnConnection::TYPE_MTPROXY, $secret);
+        $this->vpnConnectionRepository->save($connection);
+
+        $this->vpnProvider->expects($this->never())->method('getConnectionURL');
 
         // Act
         $urls = ($this->handler)(new GetVpnConnectionURLsQuery(111222333));
 
         // Assert
-        $this->assertSame([], $urls);
+        $this->assertCount(1, $urls);
+        $this->assertSame("tg://proxy?server=whitevpn.tech&port=8443&secret=dd{$secret}", $urls[0]);
     }
 }
