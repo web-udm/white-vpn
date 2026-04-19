@@ -4,11 +4,8 @@ set -e
 SECRETS_FILE="/data/secrets.txt"
 PORT="${MTPROXY_PORT:-8443}"
 
-# Download fresh proxy config
-curl -s https://core.telegram.org/getProxySecret -o /data/proxy-secret
-curl -s https://core.telegram.org/getProxyConfig -o /data/proxy-multi.conf
+curl -s https://core.telegram.org/getProxyConfig -o /etc/telegram/backend.conf
 
-# Build -S arguments from secrets file
 SECRETS_ARGS=""
 if [ -f "$SECRETS_FILE" ]; then
     while IFS= read -r line; do
@@ -29,12 +26,12 @@ if [ -n "$AD_TAG" ]; then
     TAG_ARG="-P $AD_TAG"
 fi
 
-exec /bin/mtproto-proxy \
+exec /usr/local/bin/mtproto-proxy \
     -u nobody \
-    -p 8888 \
+    -p 2398 \
     -H "$PORT" \
+    -M 2 \
+    --aes-pwd /etc/telegram/hello-explorers-how-are-you-doing \
+    /etc/telegram/backend.conf \
     $SECRETS_ARGS \
-    $TAG_ARG \
-    --aes-pwd /data/proxy-secret \
-    /data/proxy-multi.conf \
-    -M 1
+    $TAG_ARG
