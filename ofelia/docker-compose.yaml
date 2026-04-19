@@ -1,8 +1,6 @@
 services:
   ofelia:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/web-udm/white-vpn-ofelia:latest
     container_name: ofelia
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock

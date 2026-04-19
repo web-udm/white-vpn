@@ -1,0 +1,36 @@
+name: MTProxy CI/CD
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - mtproxy/**
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Copy files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: "mtproxy/docker-compose.yaml,mtproxy/entrypoint.sh"
+          target: /app
+          strip_components: 0
+
+      - name: Deploy
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            touch /app/mtproxy/secrets.txt
+            cd /app/mtproxy
+            docker compose pull
+            docker compose up -d
