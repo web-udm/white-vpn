@@ -1,4 +1,4 @@
-name: MySQL Deploy
+name: MySQL CI/CD
 
 on:
   push:
