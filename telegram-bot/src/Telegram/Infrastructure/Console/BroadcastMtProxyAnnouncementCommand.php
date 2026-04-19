@@ -57,7 +57,7 @@ final class BroadcastMtProxyAnnouncementCommand extends Command
                 $failed++;
             }
 
-            usleep(50_000); // 50ms — ~20 msg/sec, безопасно для Telegram rate limit
+            usleep(50_000);
         }
 
         $output->writeln("Done. Sent: {$sent}, failed: {$failed}.");
