@@ -10,6 +10,7 @@ services:
       SERVER_NAME: ":80"
     volumes:
       - .env:/app/.env
+      - /app/mtproxy/secrets.txt:/app/mtproxy/secrets.txt
     restart: unless-stopped
 
   worker:
