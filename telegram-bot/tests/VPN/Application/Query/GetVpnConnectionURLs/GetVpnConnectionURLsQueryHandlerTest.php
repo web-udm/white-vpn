@@ -85,7 +85,7 @@ final class GetVpnConnectionURLsQueryHandlerTest extends KernelTestCase
         // Assert — VPN + MTProxy (created lazily)
         $this->assertCount(2, $urls);
         $this->assertSame('https://vpn.example.com/sub/' . $user->getSubId(), $urls[0]);
-        $this->assertStringStartsWith('tg://proxy?', $urls[1]);
+        $this->assertStringStartsWith('https://t.me/proxy?', $urls[1]);
     }
 
     public function testReturnsAllVpnURLsPlusMtProxy(): void
@@ -186,6 +186,6 @@ final class GetVpnConnectionURLsQueryHandlerTest extends KernelTestCase
 
         // Assert
         $this->assertCount(1, $urls);
-        $this->assertSame("tg://proxy?server=whitevpn.tech&port=8443&secret=dd{$secret}", $urls[0]);
+        $this->assertSame("https://t.me/proxy?server=whitevpn.tech&port=8443&secret=dd{$secret}", $urls[0]);
     }
 }

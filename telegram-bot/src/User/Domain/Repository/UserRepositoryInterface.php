@@ -11,5 +11,8 @@ interface UserRepositoryInterface
 {
     public function findByTelegramId(TelegramId $telegramId): ?User;
 
+    /** @return int[] */
+    public function findAllTelegramIds(): array;
+
     public function save(User $user): void;
 }
