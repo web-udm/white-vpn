@@ -61,7 +61,7 @@ final class ConnectionHandler
             }
             $lines[] = '*MTProxy* (резервный доступ к Telegram):';
             foreach ($mtproxyUrls as $url) {
-                $lines[] = "`$url`";
+                $lines[] = $url;
             }
         }
 
