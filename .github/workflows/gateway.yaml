@@ -2,7 +2,7 @@ name: Gateway CI/CD
 
 on:
   push:
-    branches: [master]
+    branches: ['**']
     paths:
       - gateway/**
   workflow_dispatch:
