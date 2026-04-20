@@ -7,7 +7,7 @@ services:
       - caddy_config:/config
     network_mode: host
     restart: unless-stopped
-
+#test
 volumes:
   caddy_data:
   caddy_config:
