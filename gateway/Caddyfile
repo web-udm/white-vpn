@@ -14,6 +14,5 @@ panel.whitevpn.tech {
 }
 
 sub.whitevpn.tech {
-	header routing "happ://routing/onadd/eyJEaXJlY3RTaXRlcyI6WyJnZW9zaXRlOnJ1IiwiZ2Vvc2l0ZTpjYXRlZ29yeS1ydSJdLCJEaXJlY3RJcCI6WyJnZW9pcDpydSIsImdlb2lwOnByaXZhdGUiXX0="
 	reverse_proxy localhost:2096
 }
