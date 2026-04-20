@@ -11,6 +11,8 @@ services:
       - .env.dev:/app/.env
     restart: unless-stopped
 
+    #test
+
   worker:
     container_name: bot_dev_worker
     image: ghcr.io/web-udm/white-vpn-bot:dev
