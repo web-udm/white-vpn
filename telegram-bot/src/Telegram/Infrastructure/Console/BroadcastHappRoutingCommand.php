@@ -26,9 +26,10 @@ final class BroadcastHappRoutingCommand extends Command
 
         После этого попробуйте зайти на сайт Ozon или Kinopoisk, например. Если что-то не получилось - пишите мне @moildar
 
-        <a href="https://sub.whitevpn.tech/happ-routing">👆 Применить настройки в Happ</a>
+        🤖 Android: <a href="https://sub.whitevpn.tech/happ-routing">Применить настройки</a>
+        🍏 iPhone: <a href="https://sub.whitevpn.tech/happ-routing-ios">Применить настройки</a>
 
-        <i>Работает только в приложении Happ. Если вы используете другое - пожалуйста, переключитесь на Happ</i>
+        <i>Работает только в приложении Happ. Если вы используете другое - пожалуйста, переключитесь на Happ.</i>
         TEXT;
 
     public function __construct(
