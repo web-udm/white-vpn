@@ -2,9 +2,9 @@ name: Gateway CI/CD
 
 on:
   push:
-    branches: [master]
-    paths:
-      - gateway/**
+    branches: ["**"]
+    #paths:
+    #  - gateway/**
   workflow_dispatch:
 
 env:
