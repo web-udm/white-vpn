@@ -24,7 +24,7 @@ final class BroadcastHappRoutingCommand extends Command
         <b>Как включить:</b>
         Нажмите на ссылку ниже — Happ откроется и применит настройки автоматически.
 
-        <a href="happ://routing/onadd/eyJEaXJlY3RTaXRlcyI6WyJnZW9zaXRlOnJ1IiwiZ2Vvc2l0ZTpjYXRlZ29yeS1ydSJdLCJEaXJlY3RJcCI6WyJnZW9pcDpydSIsImdlb2lwOnByaXZhdGUiXX0=">👆 Применить настройки в Happ</a>
+        <a href="https://sub.whitevpn.tech/happ-routing">👆 Применить настройки в Happ</a>
 
         <i>Работает только в приложении Happ.</i>
         TEXT;
