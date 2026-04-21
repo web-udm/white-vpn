@@ -17,16 +17,16 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 final class BroadcastHappRoutingCommand extends Command
 {
     private const string MESSAGE = <<<TEXT
-        🇷🇺 *Обход российских сайтов в Happ*
+        🇷🇺 <b>Обход российских сайтов в Happ</b>
 
-        Теперь сайты Сбербанка, Яндекса, Госуслуг и других российских ресурсов открываются напрямую, без VPN\.
+        Теперь сайты Сбербанка, Яндекса, Госуслуг и других российских ресурсов открываются напрямую, без VPN.
 
-        *Как включить:*
-        Нажмите на ссылку ниже — Happ откроется и применит настройки автоматически\.
+        <b>Как включить:</b>
+        Нажмите на ссылку ниже — Happ откроется и применит настройки автоматически.
 
         happ://routing/onadd/eyJEaXJlY3RTaXRlcyI6WyJnZW9zaXRlOnJ1IiwiZ2Vvc2l0ZTpjYXRlZ29yeS1ydSJdLCJEaXJlY3RJcCI6WyJnZW9pcDpydSIsImdlb2lwOnByaXZhdGUiXX0=
 
-        _Работает только в приложении Happ\._
+        <i>Работает только в приложении Happ.</i>
         TEXT;
 
     public function __construct(
@@ -58,7 +58,7 @@ final class BroadcastHappRoutingCommand extends Command
                 $this->bot->sendMessage(
                     text: self::MESSAGE,
                     chat_id: $telegramId,
-                    parse_mode: 'MarkdownV2',
+                    parse_mode: 'HTML',
                 );
                 $sent++;
             } catch (\Throwable $e) {
