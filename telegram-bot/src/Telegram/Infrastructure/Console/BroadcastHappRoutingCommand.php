@@ -61,8 +61,9 @@ final class BroadcastHappRoutingCommand extends Command
                     parse_mode: 'MarkdownV2',
                 );
                 $sent++;
-            } catch (\Throwable) {
+            } catch (\Throwable $e) {
                 $failed++;
+                $output->writeln("Failed to send to {$telegramId}: " . $e->getMessage());
             }
 
             usleep(50_000);
