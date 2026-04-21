@@ -6,8 +6,6 @@ namespace App\Telegram\Infrastructure\Console;
 
 use App\User\Domain\Repository\UserRepositoryInterface;
 use SergiX44\Nutgram\Nutgram;
-use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
-use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -24,12 +22,12 @@ final class BroadcastHappRoutingCommand extends Command
         Теперь сайты Сбербанка, Яндекса, Госуслуг и других российских ресурсов открываются напрямую, без VPN\.
 
         *Как включить:*
-        Нажмите кнопку ниже — Happ откроется и применит настройки автоматически\.
+        Нажмите на ссылку ниже — Happ откроется и применит настройки автоматически\.
+
+        happ://routing/onadd/eyJEaXJlY3RTaXRlcyI6WyJnZW9zaXRlOnJ1IiwiZ2Vvc2l0ZTpjYXRlZ29yeS1ydSJdLCJEaXJlY3RJcCI6WyJnZW9pcDpydSIsImdlb2lwOnByaXZhdGUiXX0=
 
         _Работает только в приложении Happ\._
         TEXT;
-
-    private const string ROUTING_DEEPLINK = 'happ://routing/onadd/eyJEaXJlY3RTaXRlcyI6WyJnZW9zaXRlOnJ1IiwiZ2Vvc2l0ZTpjYXRlZ29yeS1ydSJdLCJEaXJlY3RJcCI6WyJnZW9pcDpydSIsImdlb2lwOnByaXZhdGUiXX0=';
 
     public function __construct(
         private readonly Nutgram $bot,
@@ -55,18 +53,12 @@ final class BroadcastHappRoutingCommand extends Command
 
         $output->writeln("Broadcasting to {$total} users...");
 
-        $keyboard = InlineKeyboardMarkup::make()
-            ->addRow(
-                InlineKeyboardButton::make('Применить настройки', url: self::ROUTING_DEEPLINK),
-            );
-
         foreach ($telegramIds as $telegramId) {
             try {
                 $this->bot->sendMessage(
                     text: self::MESSAGE,
                     chat_id: $telegramId,
                     parse_mode: 'MarkdownV2',
-                    reply_markup: $keyboard,
                 );
                 $sent++;
             } catch (\Throwable) {
