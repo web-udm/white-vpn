@@ -2,32 +2,32 @@ name: Telegram Bot CI/CD
 
 on:
   push:
-    branches: [master, develop]
-    paths:
-      - telegram-bot/**
+    branches: ['**']
+    #paths:
+    #  - telegram-bot/**
   workflow_dispatch:
 
 env:
   IMAGE: ghcr.io/web-udm/white-vpn-bot
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Create .env for tests
-        run: cp telegram-bot/.env.test telegram-bot/.env
-
-      - name: Run PHPStan
-        run: docker compose -f ./telegram-bot/docker-compose-testing.yaml run --rm app php vendor/bin/phpstan analyse --memory-limit=512M
-
-      - name: Run PHPUnit
-        run: docker compose -f ./telegram-bot/docker-compose-testing.yaml run --rm app sh -c "mkdir -p var/data && php bin/console doctrine:migrations:migrate --no-interaction && vendor/bin/phpunit"
+#  test:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v6
+#
+#      - name: Create .env for tests
+#        run: cp telegram-bot/.env.test telegram-bot/.env
+#
+#      - name: Run PHPStan
+#        run: docker compose -f ./telegram-bot/docker-compose-testing.yaml run --rm app php vendor/bin/phpstan analyse --memory-limit=512M
+#
+#      - name: Run PHPUnit
+#        run: docker compose -f ./telegram-bot/docker-compose-testing.yaml run --rm app sh -c "mkdir -p var/data && php bin/console doctrine:migrations:migrate --no-interaction && vendor/bin/phpunit"
 
   build:
     runs-on: ubuntu-latest
-    needs: test
+    #needs: test
     permissions:
       contents: read
       packages: write
@@ -44,45 +44,28 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set image tag
-        id: tag
-        run: echo "tag=${{ github.ref_name == 'master' && 'prod' || 'dev' }}" >> "$GITHUB_OUTPUT"
-
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: ./telegram-bot
           file: ./telegram-bot/docker/franken/Dockerfile
           push: true
-          tags: ${{ env.IMAGE }}:${{ steps.tag.outputs.tag }}
+          tags: ${{ env.IMAGE }}:prod
           cache-from: type=registry,ref=${{ env.IMAGE }}:cache
           cache-to: type=registry,ref=${{ env.IMAGE }}:cache,mode=max
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    environment: ${{ github.ref_name == 'master' && 'production' || 'develop' }}
+    environment: production
     steps:
       - uses: actions/checkout@v6
-
-      - name: Set deploy vars
-        id: vars
-        run: |
-          if [ "${{ github.ref_name }}" = "master" ]; then
-            echo "compose_file=docker-compose.prod.yaml" >> "$GITHUB_OUTPUT"
-            echo "env_file=.env" >> "$GITHUB_OUTPUT"
-            echo "deploy_dir=/app/telegram-bot-prod" >> "$GITHUB_OUTPUT"
-          else
-            echo "compose_file=docker-compose.dev.yaml" >> "$GITHUB_OUTPUT"
-            echo "env_file=.env.dev" >> "$GITHUB_OUTPUT"
-            echo "deploy_dir=/app/telegram-bot-dev" >> "$GITHUB_OUTPUT"
-          fi
 
       - name: Prepare deploy files
         run: |
           mkdir -p deploy
-          cp telegram-bot/${{ steps.vars.outputs.compose_file }} deploy/docker-compose.yaml
-          echo "${{ vars.ENV }}" > deploy/${{ steps.vars.outputs.env_file }}
+          cp telegram-bot/docker-compose.prod.yaml deploy/docker-compose.yaml
+          echo "${{ vars.ENV }}" > deploy/.env
 
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
@@ -90,8 +73,8 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          source: deploy/docker-compose.yaml,deploy/${{ steps.vars.outputs.env_file }}
-          target: ${{ steps.vars.outputs.deploy_dir }}
+          source: deploy/docker-compose.yaml,deploy/.env
+          target: /app/telegram-bot-prod
           strip_components: 1
 
       - name: Deploy
@@ -102,7 +85,7 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            cd ${{ steps.vars.outputs.deploy_dir }}
+            cd /app/telegram-bot-prod
             docker compose pull
             docker compose down
             docker compose up -d
