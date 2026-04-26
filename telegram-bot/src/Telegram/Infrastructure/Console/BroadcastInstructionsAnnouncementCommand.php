@@ -21,7 +21,7 @@ final class BroadcastInstructionsAnnouncementCommand extends Command
 
         Туда будут складываться полезные статьи по настройке и оптимизации\.
 
-        Пока что там одна статья, зато полезная - про то, как добавить приложения в "игнор" и не использовать VPN на них\.
+        Пока что там одна статья, зато полезная \- про то, как добавить приложения в "игнор" и не использовать VPN на них\.
         TEXT;
 
     public function __construct(
@@ -49,7 +49,7 @@ final class BroadcastInstructionsAnnouncementCommand extends Command
         $sent = 0;
         $failed = 0;
 
-        $output->writeln("Broadcasting to {$total} user(s)...");
+        $output->writeln('Broadcasting to ' . $total . ' user(s)...');
 
         foreach ($telegramIds as $telegramId) {
             try {
@@ -59,14 +59,15 @@ final class BroadcastInstructionsAnnouncementCommand extends Command
                     parse_mode: 'MarkdownV2',
                 );
                 $sent++;
-            } catch (\Throwable) {
+            } catch (\Throwable $e) {
                 $failed++;
+                $output->writeln('  [FAIL] chat_id=' . $telegramId . ': ' . $e->getMessage());
             }
 
             usleep(50_000);
         }
 
-        $output->writeln("Done. Sent: {$sent}, failed: {$failed}.");
+        $output->writeln('Done. Sent: ' . $sent . ', failed: ' . $failed . '.');
 
         return Command::SUCCESS;
     }
