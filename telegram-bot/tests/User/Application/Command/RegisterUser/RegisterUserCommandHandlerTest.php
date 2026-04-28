@@ -30,7 +30,6 @@ final class RegisterUserCommandHandlerTest extends KernelTestCase
 
         // Assert
         $this->assertSame(123456789, $user->getTelegramId()->value);
-        $this->assertNotEmpty($user->getSubId());
         $this->assertNotNull($user->getId());
     }
 

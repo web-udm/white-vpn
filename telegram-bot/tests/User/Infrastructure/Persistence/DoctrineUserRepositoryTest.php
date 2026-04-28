@@ -36,7 +36,6 @@ final class DoctrineUserRepositoryTest extends KernelTestCase
         // Assert
         $this->assertNotNull($found);
         $this->assertSame(123456789, $found->getTelegramId()->value);
-        $this->assertNotEmpty($found->getSubId());
     }
 
     public function testFindByTelegramIdReturnsNullWhenNotFound(): void

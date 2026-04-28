@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\VPN\Infrastructure\Xui;
 
 use App\VPN\Domain\VPNProviderInterface;
-use App\VPN\Port\Subscription;
 use App\VPN\Port\VPNException;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -14,20 +13,23 @@ final class XuiVPNProvider implements VPNProviderInterface
 {
     private ?string $sessionCookie = null;
 
+    /**
+     * @param int[] $inboundIds
+     */
     public function __construct(
         private readonly HttpClientInterface $httpClient,
         #[Autowire('%xui.base_url%')] private readonly string $baseUrl,
         #[Autowire('%xui.subscription_url%')] private readonly string $subscriptionUrl,
         #[Autowire('%xui.username%')] private readonly string $username,
         #[Autowire('%xui.password%')] private readonly string $password,
-        #[Autowire('%xui.inbound_id%')] private readonly int $inboundId,
+        #[Autowire('%xui.inbound_ids%')] private readonly array $inboundIds,
     ) {
     }
 
-    public function createClient(string $subId, int $limitIp = 3, int $expiryTimestamp = 0): void
+    public function createClient(string $subId, int $inboundId, int $limitIp = 3, int $expiryTimestamp = 0): void
     {
         $uuid = $this->generateUuid();
-        $email = $this->buildEmail($subId);
+        $email = $this->buildEmail($subId, $inboundId);
 
         $clientSettings = json_encode([
             'clients' => [[
@@ -47,7 +49,7 @@ final class XuiVPNProvider implements VPNProviderInterface
 
         $response = $this->request('POST', '/panel/api/inbounds/addClient', [
             'json' => [
-                'id' => $this->inboundId,
+                'id' => $inboundId,
                 'settings' => $clientSettings,
             ],
         ]);
@@ -57,27 +59,10 @@ final class XuiVPNProvider implements VPNProviderInterface
         }
     }
 
-    public function getSubscriptionStatus(string $subId): ?Subscription
+    /** @return int[] */
+    public function getInboundIds(): array
     {
-        $email = $this->buildEmail($subId);
-        $response = $this->request('GET', '/panel/api/inbounds/getClientTraffics/' . $email);
-
-        if (!($response['success'] ?? false)) {
-            return null;
-        }
-
-        $obj = $response['obj'] ?? null;
-
-        if ($obj === null) {
-            return null;
-        }
-
-        return new Subscription(
-            enabled: $obj['enable'],
-            expiryTime: $obj['expiryTime'],
-            uploadBytes: $obj['up'],
-            downloadBytes: $obj['down'],
-        );
+        return array_map(intval(...), $this->inboundIds);
     }
 
     public function getConnectionURL(string $subId): string
@@ -152,9 +137,9 @@ final class XuiVPNProvider implements VPNProviderInterface
         return $this->httpClient->request($method, $this->baseUrl . $path, $options);
     }
 
-    private function buildEmail(string $subId): string
+    private function buildEmail(string $subId, int $inboundId): string
     {
-        return $subId . '_' . $this->inboundId;
+        return $subId . '_' . $inboundId;
     }
 
     private function generateUuid(): string

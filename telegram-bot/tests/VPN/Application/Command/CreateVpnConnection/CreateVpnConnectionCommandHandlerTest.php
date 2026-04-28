@@ -45,49 +45,60 @@ final class CreateVpnConnectionCommandHandlerTest extends KernelTestCase
         );
     }
 
-    public function testCreatesVpnConnectionAndCallsProvider(): void
+    public function testCreatesVpnConnectionInEachInbound(): void
     {
         // Arrange
         $user = ($this->registerUserHandler)(new RegisterUserCommand(111222333));
         $expiresAt = new \DateTimeImmutable('+30 days');
         $subscription = ($this->createSubscriptionHandler)(new CreateSubscriptionCommand($user->getId(), $expiresAt));
+        $expiryTimestamp = $expiresAt->getTimestamp() * 1000;
 
+        $capturedCalls = [];
+        $this->vpnProvider->method('getInboundIds')->willReturn([1, 9]);
         $this->vpnProvider
-            ->expects($this->once())
+            ->expects($this->exactly(2))
             ->method('createClient')
-            ->with($user->getSubId(), 1, $expiresAt->getTimestamp() * 1000);
+            ->willReturnCallback(function (string $subId, int $inboundId, int $limitIp, int $expiryTs) use (&$capturedCalls): void {
+                $capturedCalls[] = ['subId' => $subId, 'inboundId' => $inboundId, 'limitIp' => $limitIp];
+            });
 
         // Act
         ($this->handler)(new CreateVpnConnectionCommand(
             subscriptionId: $subscription->getId(),
-            subId: $user->getSubId(),
             limitIp: 1,
             expiresAt: $expiresAt,
         ));
 
-        // Assert
+        // Assert: createClient called once per inbound with the same subId
+        $this->assertCount(2, $capturedCalls);
+        $this->assertSame(1, $capturedCalls[0]['inboundId']);
+        $this->assertSame(9, $capturedCalls[1]['inboundId']);
+        $this->assertSame($capturedCalls[0]['subId'], $capturedCalls[1]['subId']);
+
+        // Assert: exactly one VpnConnection saved regardless of inbound count
         $connections = $this->vpnConnectionRepository->findAllActiveBySubscriptionId($subscription->getId());
         $this->assertCount(1, $connections);
         $this->assertSame(VpnConnection::TYPE_SUBSCRIPTION, $connections[0]->getType());
-        $this->assertSame($user->getSubId(), $connections[0]->getExternalId());
+        $this->assertSame($capturedCalls[0]['subId'], $connections[0]->getExternalId());
     }
 
-    public function testVipUserGetsHigherLimitIp(): void
+    public function testLimitIpIsPassedToProvider(): void
     {
         // Arrange
         $user = ($this->registerUserHandler)(new RegisterUserCommand(444555666));
         $expiresAt = new \DateTimeImmutable('+30 days');
         $subscription = ($this->createSubscriptionHandler)(new CreateSubscriptionCommand($user->getId(), $expiresAt, true));
+        $expiryTimestamp = $expiresAt->getTimestamp() * 1000;
 
+        $this->vpnProvider->method('getInboundIds')->willReturn([1]);
         $this->vpnProvider
             ->expects($this->once())
             ->method('createClient')
-            ->with($user->getSubId(), 10, $expiresAt->getTimestamp() * 1000);
+            ->with($this->anything(), 1, 10, $expiryTimestamp);
 
         // Act
         ($this->handler)(new CreateVpnConnectionCommand(
             subscriptionId: $subscription->getId(),
-            subId: $user->getSubId(),
             limitIp: 10,
             expiresAt: $expiresAt,
         ));

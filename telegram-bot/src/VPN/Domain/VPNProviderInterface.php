@@ -6,7 +6,10 @@ namespace App\VPN\Domain;
 
 interface VPNProviderInterface
 {
-    public function createClient(string $subId, int $limitIp, int $expiryTimestamp): void;
+    public function createClient(string $subId, int $inboundId, int $limitIp, int $expiryTimestamp): void;
+
+    /** @return int[] */
+    public function getInboundIds(): array;
 
     public function getConnectionURL(string $subId): string;
 }
