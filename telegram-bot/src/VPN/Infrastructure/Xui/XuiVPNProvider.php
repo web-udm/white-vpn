@@ -34,6 +34,7 @@ final class XuiVPNProvider implements VPNProviderInterface
         $clientSettings = json_encode([
             'clients' => [[
                 'id' => $uuid,
+                'password' => $uuid, // Trojan inbounds use password instead of id
                 'email' => $email,
                 'limitIp' => $limitIp,
                 'totalGB' => 0,
@@ -148,6 +149,9 @@ final class XuiVPNProvider implements VPNProviderInterface
         $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
         $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
 
-        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+        return $data
+                |> bin2hex(...)
+                |> (fn($x) => str_split($x, 4))
+                |> (fn($x) => vsprintf('%s%s-%s-%s-%s-%s%s%s', $x));
     }
 }

@@ -8,8 +8,18 @@ export:
 force-internal:
 
 require:
-  - "#symfony/dependency-injection"
-  - "#symfony/http-client"
-  - "#symfony/messenger"
+    - "@subscription"
+    - "#"
+    - "#doctrine/dbal"
+    - "#doctrine/orm"
+    - "#doctrine/persistence"
+    - "#phpstan/phpstan"
+    - "#symfony/console"
+    - "#symfony/dependency-injection"
+    - "#symfony/http-client"
+    - "#symfony/http-client-contracts"
+    - "#symfony/maker-bundle"
+    - "#symfony/messenger"
+    - "#symfony/polyfill-php80"
 
 allow-internal-access:
