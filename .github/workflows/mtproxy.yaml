@@ -2,9 +2,9 @@ name: MTProxy CI/CD
 
 on:
   push:
-    branches: [master]
-    paths:
-      - mtproxy/**
+    branches: ['**']
+    #paths:
+    #  - mtproxy/**
   workflow_dispatch:
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          source: "mtproxy/docker-compose.yaml,mtproxy/entrypoint.sh"
+          source: "mtproxy/docker-compose.yaml,mtproxy/entrypoint.sh,mtproxy/Dockerfile"
           target: /app
           strip_components: 0
 
@@ -32,5 +32,5 @@ jobs:
           script: |
             touch /app/mtproxy/secrets.txt
             cd /app/mtproxy
-            docker compose pull
+            docker compose build
             docker compose up -d
