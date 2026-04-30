@@ -11,6 +11,7 @@ final readonly class MainMenu
     public const string STATUS = 'status';
     public const string SUPPORT = 'support';
     public const string GET_CONNECTION = 'get_connection';
+    public const string INSTRUCTIONS = 'instructions';
 
     public const string MENU_BUTTON_TEXT = '📋 Меню';
 
@@ -20,5 +21,6 @@ final readonly class MainMenu
         self::STATUS => '📊 Текущий статус',
         self::SUPPORT => '🆘 Поддержка',
         self::GET_CONNECTION => '🔑 Мои подключения',
+        self::INSTRUCTIONS => '📖 Инструкции',
     ];
 }

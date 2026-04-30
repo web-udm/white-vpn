@@ -1,4 +1,7 @@
 # yaml-language-server: $schema=../vendor/symfony/dependency-injection/Loader/schema/services.schema.json
+imports:
+    - { resource: 'instructions.yaml' }
+
 services:
     _defaults:
         autowire: true

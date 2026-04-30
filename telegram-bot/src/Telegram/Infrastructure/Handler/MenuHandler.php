@@ -23,6 +23,9 @@ final readonly class MenuHandler
             ->addRow(
                 InlineKeyboardButton::make(MainMenu::BUTTONS[MainMenu::STATUS], callback_data: MainMenu::STATUS),
                 InlineKeyboardButton::make(MainMenu::BUTTONS[MainMenu::SUPPORT], callback_data: MainMenu::SUPPORT),
+            )
+            ->addRow(
+                InlineKeyboardButton::make(MainMenu::BUTTONS[MainMenu::INSTRUCTIONS], callback_data: MainMenu::INSTRUCTIONS),
             );
 
         $bot->sendMessage(text: 'Выберите действие:', reply_markup: $keyboard);
