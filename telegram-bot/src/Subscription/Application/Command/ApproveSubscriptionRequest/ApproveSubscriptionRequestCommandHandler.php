@@ -45,7 +45,6 @@ final class ApproveSubscriptionRequestCommandHandler
 
         $this->messageBus->dispatch(new CreateVpnConnectionCommand(
             subscriptionId: $subscriptionId,
-            subId: $user->getSubId(),
             limitIp: $subscription->isVip() ? 10 : 1,
             expiresAt: $expiresAt,
         ));

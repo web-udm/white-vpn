@@ -10,7 +10,6 @@ final readonly class CreateVpnConnectionCommand
 {
     public function __construct(
         public int $subscriptionId,
-        public string $subId,
         public int $limitIp,
         public DateTimeImmutable $expiresAt,
     ) {

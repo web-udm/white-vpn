@@ -12,7 +12,7 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 final class XuiVPNProviderTest extends TestCase
 {
-    private function createProvider(array $responses): XuiVPNProvider
+    private function createProvider(array $responses, array $inboundIds = [1]): XuiVPNProvider
     {
         $mockClient = new MockHttpClient($responses, 'https://panel.example.com');
 
@@ -22,7 +22,7 @@ final class XuiVPNProviderTest extends TestCase
             subscriptionUrl: 'https://sub.example.com',
             username: 'admin',
             password: 'secret',
-            inboundId: 1,
+            inboundIds: $inboundIds,
         );
     }
 
@@ -43,7 +43,7 @@ final class XuiVPNProviderTest extends TestCase
         ]);
 
         // Act & Assert (no exception = success)
-        $provider->createClient('some-uuid', 3);
+        $provider->createClient('some-uuid', 1, 3);
         $this->addToAssertionCount(1);
     }
 
@@ -60,53 +60,19 @@ final class XuiVPNProviderTest extends TestCase
         $this->expectExceptionMessage('client already exists');
 
         // Act
-        $provider->createClient('some-uuid');
+        $provider->createClient('some-uuid', 1);
     }
 
-    public function testGetSubscriptionStatusReturnsStatus(): void
+    public function testGetInboundIds(): void
     {
         // Arrange
-        $provider = $this->createProvider([
-            $this->loginResponse(),
-            new MockResponse(json_encode([
-                'success' => true,
-                'obj' => [
-                    'email' => 'some-uuid_1',
-                    'enable' => true,
-                    'expiryTime' => 1750000000000,
-                    'up' => 1024000,
-                    'down' => 5120000,
-                ],
-            ])),
-        ]);
+        $provider = $this->createProvider([], [1, 9]);
 
-        // Act
-        $status = $provider->getSubscriptionStatus('some-uuid');
-
-        // Assert
-        $this->assertNotNull($status);
-                $this->assertTrue($status->enabled);
-        $this->assertSame(1750000000000, $status->expiryTime);
-        $this->assertSame(1024000, $status->uploadBytes);
-        $this->assertSame(5120000, $status->downloadBytes);
+        // Act & Assert
+        $this->assertSame([1, 9], $provider->getInboundIds());
     }
 
-    public function testGetSubscriptionStatusReturnsNullWhenNotFound(): void
-    {
-        // Arrange
-        $provider = $this->createProvider([
-            $this->loginResponse(),
-            new MockResponse(json_encode(['success' => true, 'obj' => null])),
-        ]);
-
-        // Act
-        $status = $provider->getSubscriptionStatus('nonexistent-uuid');
-
-        // Assert
-        $this->assertNull($status);
-    }
-
-    public function testGetSubscriptionURLReturnsURL(): void
+    public function testGetConnectionURLReturnsURL(): void
     {
         // Arrange
         $provider = $this->createProvider([]);
@@ -125,24 +91,13 @@ final class XuiVPNProviderTest extends TestCase
             $this->loginResponse(),
             new MockResponse('', ['http_code' => 401]),
             $this->loginResponse(),
-            new MockResponse(json_encode([
-                'success' => true,
-                'obj' => [
-                    'email' => 'some-uuid_1',
-                    'enable' => true,
-                    'expiryTime' => 0,
-                    'up' => 0,
-                    'down' => 0,
-                ],
-            ])),
+            new MockResponse(json_encode(['success' => true, 'msg' => 'ok'])),
         ]);
 
-        // Act
-        $status = $provider->getSubscriptionStatus('some-uuid');
-
-        // Assert
-        $this->assertNotNull($status);
-            }
+        // Act & Assert (no exception = success after re-auth)
+        $provider->createClient('some-uuid', 1);
+        $this->addToAssertionCount(1);
+    }
 
     public function testLoginFailureThrows(): void
     {
@@ -159,6 +114,6 @@ final class XuiVPNProviderTest extends TestCase
         $this->expectExceptionMessage('invalid credentials');
 
         // Act
-        $provider->getSubscriptionStatus('some-uuid');
+        $provider->createClient('some-uuid', 1);
     }
 }

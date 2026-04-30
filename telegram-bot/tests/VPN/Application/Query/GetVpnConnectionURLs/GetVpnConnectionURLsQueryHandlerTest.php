@@ -68,23 +68,24 @@ final class GetVpnConnectionURLsQueryHandlerTest extends KernelTestCase
     public function testReturnsVpnAndMtProxyURLs(): void
     {
         // Arrange
+        $subId = 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee';
         $user = ($this->registerUserHandler)(new RegisterUserCommand(111222333));
         $subscription = ($this->createSubscriptionHandler)(new CreateSubscriptionCommand($user->getId(), new \DateTimeImmutable('+30 days')));
-        $connection = new VpnConnection($subscription->getId(), VpnConnection::TYPE_SUBSCRIPTION, $user->getSubId());
+        $connection = new VpnConnection($subscription->getId(), VpnConnection::TYPE_SUBSCRIPTION, $subId);
         $this->vpnConnectionRepository->save($connection);
 
         $this->vpnProvider
             ->expects($this->once())
             ->method('getConnectionURL')
-            ->with($user->getSubId())
-            ->willReturn('https://vpn.example.com/sub/' . $user->getSubId());
+            ->with($subId)
+            ->willReturn('https://vpn.example.com/sub/' . $subId);
 
         // Act
         $urls = ($this->handler)(new GetVpnConnectionURLsQuery(111222333));
 
         // Assert — VPN + MTProxy (created lazily)
         $this->assertCount(2, $urls);
-        $this->assertSame('https://vpn.example.com/sub/' . $user->getSubId(), $urls[0]);
+        $this->assertSame('https://vpn.example.com/sub/' . $subId, $urls[0]);
         $this->assertStringStartsWith('https://t.me/proxy?', $urls[1]);
     }
 
@@ -115,7 +116,7 @@ final class GetVpnConnectionURLsQueryHandlerTest extends KernelTestCase
         // Arrange
         $user = ($this->registerUserHandler)(new RegisterUserCommand(111222333));
         $subscription = ($this->createSubscriptionHandler)(new CreateSubscriptionCommand($user->getId(), new \DateTimeImmutable('+30 days')));
-        $connection = new VpnConnection($subscription->getId(), VpnConnection::TYPE_SUBSCRIPTION, $user->getSubId());
+        $connection = new VpnConnection($subscription->getId(), VpnConnection::TYPE_SUBSCRIPTION, 'aaaaaaaa-bbbb-4ccc-8ddd-ffffffffffff');
         $this->vpnConnectionRepository->save($connection);
 
         $this->vpnProvider->method('getConnectionURL')->willReturn('https://vpn.example.com');
@@ -134,7 +135,7 @@ final class GetVpnConnectionURLsQueryHandlerTest extends KernelTestCase
         // Arrange
         $user = ($this->registerUserHandler)(new RegisterUserCommand(111222333));
         $subscription = ($this->createSubscriptionHandler)(new CreateSubscriptionCommand($user->getId(), new \DateTimeImmutable('+30 days')));
-        $connection = new VpnConnection($subscription->getId(), VpnConnection::TYPE_SUBSCRIPTION, $user->getSubId());
+        $connection = new VpnConnection($subscription->getId(), VpnConnection::TYPE_SUBSCRIPTION, 'aaaaaaaa-bbbb-4ccc-8ddd-111111111111');
         $this->vpnConnectionRepository->save($connection);
 
         $this->vpnProvider->method('getConnectionURL')->willReturn('https://vpn.example.com');

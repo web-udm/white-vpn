@@ -29,6 +29,11 @@ final readonly class DoctrineVpnConnectionRepository implements VpnConnectionRep
         ]);
     }
 
+    public function findAllByType(string $type): array
+    {
+        return $this->em->getRepository(VpnConnection::class)->findBy(['type' => $type]);
+    }
+
     public function findAllActiveMtProxySecrets(): array
     {
         $sql = "SELECT vc.external_id

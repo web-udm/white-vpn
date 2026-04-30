@@ -21,16 +21,28 @@ final readonly class CreateVpnConnectionCommandHandler
 
     public function __invoke(CreateVpnConnectionCommand $command): void
     {
+        $subId = self::generateSubId();
         $expiryTimestamp = $command->expiresAt->getTimestamp() * 1000;
 
-        $this->vpnProvider->createClient($command->subId, $command->limitIp, $expiryTimestamp);
+        foreach ($this->vpnProvider->getInboundIds() as $inboundId) {
+            $this->vpnProvider->createClient($subId, $inboundId, $command->limitIp, $expiryTimestamp);
+        }
 
         $connection = new VpnConnection(
             $command->subscriptionId,
             VpnConnection::TYPE_SUBSCRIPTION,
-            $command->subId,
+            $subId,
         );
 
         $this->vpnConnectionRepository->save($connection);
+    }
+
+    private static function generateSubId(): string
+    {
+        $data = random_bytes(16);
+        $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
+        $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
+
+        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
 }
