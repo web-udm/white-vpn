@@ -13,7 +13,7 @@ FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libssl1.1 curl \
+    libssl1.1 curl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /mtproxy/objs/bin/mtproto-proxy /usr/local/bin/mtproto-proxy
