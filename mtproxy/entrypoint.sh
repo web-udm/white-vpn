@@ -3,8 +3,11 @@ set -e
 
 SECRETS_FILE="/data/secrets.txt"
 PORT="${MTPROXY_PORT:-8443}"
+PROXY_SECRET="/tmp/proxy-secret"
+BACKEND_CONF="/tmp/backend.conf"
 
-curl -s https://core.telegram.org/getProxyConfig -o /etc/telegram/backend.conf
+curl -s https://core.telegram.org/getProxySecret -o "$PROXY_SECRET"
+curl -s https://core.telegram.org/getProxyConfig -o "$BACKEND_CONF"
 
 SECRETS_ARGS=""
 if [ -f "$SECRETS_FILE" ]; then
@@ -31,7 +34,7 @@ exec /usr/local/bin/mtproto-proxy \
     -p 2398 \
     -H "$PORT" \
     -M 2 \
-    --aes-pwd /etc/telegram/hello-explorers-how-are-you-doing \
-    /etc/telegram/backend.conf \
+    --aes-pwd "$PROXY_SECRET" \
+    "$BACKEND_CONF" \
     $SECRETS_ARGS \
     $TAG_ARG

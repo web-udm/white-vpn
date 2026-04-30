@@ -1,8 +1,7 @@
 services:
   mtproxy:
-    image: telegrammessenger/proxy:latest
+    build: .
     container_name: mtproxy_app
-    entrypoint: ["/bin/sh", "/entrypoint.sh"]
     volumes:
       - ./secrets.txt:/data/secrets.txt:ro
       - ./entrypoint.sh:/entrypoint.sh:ro
