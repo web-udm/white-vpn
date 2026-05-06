@@ -11,19 +11,19 @@ env:
   IMAGE: ghcr.io/web-udm/white-vpn-bot
 
 jobs:
-#  test:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v6
-#
-#      - name: Create .env for tests
-#        run: cp telegram-bot/.env.test telegram-bot/.env
-#
-#      - name: Run PHPStan
-#        run: docker compose -f ./telegram-bot/docker-compose-testing.yaml run --rm app php vendor/bin/phpstan analyse --memory-limit=512M
-#
-#      - name: Run PHPUnit
-#        run: docker compose -f ./telegram-bot/docker-compose-testing.yaml run --rm app sh -c "mkdir -p var/data && php bin/console doctrine:migrations:migrate --no-interaction && vendor/bin/phpunit"
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Create .env for tests
+        run: cp telegram-bot/.env.test telegram-bot/.env
+
+      - name: Run PHPStan
+        run: docker compose -f ./telegram-bot/docker-compose-testing.yaml run --rm app php vendor/bin/phpstan analyse --memory-limit=512M
+
+      - name: Run PHPUnit
+        run: docker compose -f ./telegram-bot/docker-compose-testing.yaml run --rm app sh -c "mkdir -p var/data && php bin/console doctrine:migrations:migrate --no-interaction && vendor/bin/phpunit"
 
   build:
     runs-on: ubuntu-latest

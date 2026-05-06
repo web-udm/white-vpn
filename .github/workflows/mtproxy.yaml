@@ -2,9 +2,9 @@ name: MTProxy CI/CD
 
 on:
   push:
-    branches: ['**']
-    #paths:
-    #  - mtproxy/**
+    branches: [master]
+    paths:
+      - mtproxy/**
   workflow_dispatch:
 
 jobs:

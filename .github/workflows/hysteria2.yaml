@@ -1,10 +1,10 @@
-name: MySQL CI/CD
+name: Hysteria 2 CI/CD
 
 on:
   push:
     branches: [master]
     paths:
-      - mysql/**
+      - hysteria2/**
   workflow_dispatch:
 
 jobs:
@@ -13,22 +13,30 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Copy MySQL files to server
+      - name: Prepare config
+        run: |
+          mkdir -p deploy
+          cp hysteria2/docker-compose.yaml deploy/
+          sed "s/CHANGE_ME/${{ secrets.HYSTERIA2_PASSWORD }}/" hysteria2/hysteria.yaml > deploy/hysteria.yaml
+
+      - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          source: mysql/
-          target: /app/mysql
+          source: deploy/docker-compose.yaml,deploy/hysteria.yaml
+          target: /app/hysteria2
           strip_components: 1
 
-      - name: Deploy MySQL
+      - name: Deploy
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
-            cd /app/mysql
+            cd /app/hysteria2
+            docker compose pull
+            docker compose down
             docker compose up -d

@@ -1,0 +1,15 @@
+services:
+  hysteria2:
+    image: tobyxdd/hysteria:latest
+    container_name: hysteria2
+    network_mode: host
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./hysteria.yaml:/etc/hysteria/hysteria.yaml
+      - acme:/acme
+    command: server --config /etc/hysteria/hysteria.yaml
+
+volumes:
+  acme:

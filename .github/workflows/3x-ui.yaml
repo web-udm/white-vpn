@@ -2,7 +2,7 @@ name: 3x-ui CI/CD
 
 on:
   push:
-    branches: ['**']
+    branches: [master]
     paths:
       - 3x-ui/**
   workflow_dispatch:
