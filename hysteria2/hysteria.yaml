@@ -8,11 +8,11 @@ acme:
   dns:
     name: cloudflare
     config:
-      cloudflare_api_token: "CHANGE_ME_PASSWORD"
+      cloudflare_api_token: "%%CF_TOKEN%%"
 
 auth:
   type: password
-  password: "CHANGE_ME_TOKEN"
+  password: "%%PASSWORD%%"
 
 trafficStats:
   listen: 127.0.0.1:9999
