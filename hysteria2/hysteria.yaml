@@ -4,9 +4,6 @@ acme:
   domains:
     - hy2.whitevpn.tech
   email: web.udm@gmail.com
-  type: http
-  http:
-    altPort: 8888
 
 auth:
   type: password
