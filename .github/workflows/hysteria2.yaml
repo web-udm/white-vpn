@@ -17,7 +17,10 @@ jobs:
         run: |
           mkdir -p deploy
           cp hysteria2/docker-compose.yaml deploy/
-          sed "s/CHANGE_ME/${{ secrets.HYSTERIA2_PASSWORD }}/" hysteria2/hysteria.yaml > deploy/hysteria.yaml
+          sed \
+            -e "s/CHANGE_ME/${{ secrets.HYSTERIA2_PASSWORD }}/" \
+            -e "s/cloudflare_api_token: \"CHANGE_ME\"/cloudflare_api_token: \"${{ secrets.CLOUDFLARE_API_TOKEN }}\"/" \
+            hysteria2/hysteria.yaml > deploy/hysteria.yaml
 
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7

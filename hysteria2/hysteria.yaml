@@ -4,6 +4,11 @@ acme:
   domains:
     - hy2.whitevpn.tech
   email: web.udm@gmail.com
+  type: dns
+  dns:
+    name: cloudflare
+    config:
+      cloudflare_api_token: "CHANGE_ME"
 
 auth:
   type: password
