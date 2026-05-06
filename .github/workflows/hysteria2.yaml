@@ -20,6 +20,7 @@ jobs:
           sed \
             -e "s|%%CF_TOKEN%%|${{ secrets.CLOUDFLARE_API_TOKEN }}|" \
             -e "s|%%PASSWORD%%|${{ secrets.HYSTERIA2_PASSWORD }}|" \
+            -e "s|%%OBFS_PASSWORD%%|${{ secrets.HYSTERIA2_OBFS_PASSWORD }}|" \
             hysteria2/hysteria.yaml > deploy/hysteria.yaml
 
       - name: Copy files to server

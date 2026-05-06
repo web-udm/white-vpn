@@ -10,6 +10,11 @@ acme:
     config:
       cloudflare_api_token: "%%CF_TOKEN%%"
 
+obfs:
+  type: salamander
+  salamander:
+    password: "%%OBFS_PASSWORD%%"
+
 auth:
   type: password
   password: "%%PASSWORD%%"
