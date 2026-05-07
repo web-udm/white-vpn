@@ -1,4 +1,4 @@
-listen: :8443
+listen: 0.0.0.0:8443
 
 acme:
   domains:
@@ -10,21 +10,21 @@ acme:
     config:
       cloudflare_api_token: "%%CF_TOKEN%%"
 
+obfs:
+  type: salamander
+  salamander:
+    password: "%%OBFS_PASSWORD%%"
+
 auth:
   type: password
   password: "%%PASSWORD%%"
 
-trafficStats:
-  listen: 127.0.0.1:9999
+bandwidth:
+  up: 20 mbps
+  down: 100 mbps
 
 masquerade:
   type: proxy
   proxy:
     url: https://www.bing.com
     rewriteHost: true
-
-quic:
-  initStreamReceiveWindow: 26843545
-  maxStreamReceiveWindow: 26843545
-  initConnReceiveWindow: 67108864
-  maxConnReceiveWindow: 67108864
