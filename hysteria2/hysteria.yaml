@@ -1,4 +1,4 @@
-listen: 0.0.0.0:8080
+listen: 0.0.0.0:20000-50000
 
 acme:
   domains:
