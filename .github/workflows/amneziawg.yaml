@@ -37,6 +37,7 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
+            sysctl -w net.ipv4.ip_forward=1
             cd /app/amneziawg
             docker compose pull
             docker compose down
