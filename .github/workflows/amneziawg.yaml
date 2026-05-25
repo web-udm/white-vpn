@@ -21,7 +21,8 @@ jobs:
           python3 -c "
           import os
           content = open('amneziawg/docker-compose.yaml').read()
-          content = content.replace('%%AWG_PASSWORD_HASH%%', os.environ['AWG_PASSWORD_HASH'])
+          escaped = os.environ['AWG_PASSWORD_HASH'].replace('\$', '\$\$')
+          content = content.replace('%%AWG_PASSWORD_HASH%%', escaped)
           open('deploy/docker-compose.yaml', 'w').write(content)
           "
 
