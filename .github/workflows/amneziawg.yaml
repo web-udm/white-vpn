@@ -14,11 +14,16 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Prepare config
+        env:
+          AWG_PASSWORD_HASH: ${{ secrets.AWG_PASSWORD_HASH }}
         run: |
           mkdir -p deploy
-          sed \
-            -e "s|%%AWG_PASSWORD_HASH%%|${{ secrets.AWG_PASSWORD_HASH }}|" \
-            amneziawg/docker-compose.yaml > deploy/docker-compose.yaml
+          python3 -c "
+          import os
+          content = open('amneziawg/docker-compose.yaml').read()
+          content = content.replace('%%AWG_PASSWORD_HASH%%', os.environ['AWG_PASSWORD_HASH'])
+          open('deploy/docker-compose.yaml', 'w').write(content)
+          "
 
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
