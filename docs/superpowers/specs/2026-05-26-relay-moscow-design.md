@@ -28,20 +28,21 @@ Reality и Shadowsocks расшифровываются на основном с
 ### relay/ сервис
 
 **Файлы:**
-- `relay/docker-compose.yaml` — запускает `nginx:alpine` со stream-конфигом
-- `relay/nginx.conf` — L4 TCP/UDP proxy конфиг
+- `relay/Dockerfile` — кастомный Caddy с плагином `caddy-l4` (через `xcaddy`)
+- `relay/docker-compose.yaml` — запускает кастомный образ Caddy
+- `relay/caddy.json` — JSON-конфиг Caddy L4 (Caddyfile не поддерживает L4-директивы)
 
-**nginx stream** маршрутизирует по портам:
-- `443 TCP` → `$MAIN_SERVER_IP:443`
-- `$REALITY_PORT TCP` → `$MAIN_SERVER_IP:$REALITY_PORT`
-- `$SS_PORT TCP` → `$MAIN_SERVER_IP:$SS_PORT`
-- `$SS_PORT UDP` → `$MAIN_SERVER_IP:$SS_PORT`
+**Caddy L4** маршрутизирует по портам:
+- `443 TCP` → `{env.MAIN_SERVER_IP}:443`
+- `{env.RELAY_REALITY_PORT} TCP` → `{env.MAIN_SERVER_IP}:{env.RELAY_REALITY_PORT}`
+- `{env.RELAY_SS_PORT} TCP` → `{env.MAIN_SERVER_IP}:{env.RELAY_SS_PORT}`
+- `{env.RELAY_SS_PORT} UDP` → `{env.MAIN_SERVER_IP}:{env.RELAY_SS_PORT}`
 
-Переменные окружения подставляются через `envsubst` при старте контейнера.
+Переменные окружения подставляются через нативный синтаксис Caddy `{env.VAR}` — `envsubst` не нужен.
 
 ### .github/workflows/relay.yaml
 
-Повторяет паттерн существующих workflows (например `3x-ui.yaml`): SCP файлов `relay/` на VDSINA, SSH для запуска `docker compose up -d`. Шаг сборки образа не нужен — используется `nginx:alpine` напрямую.
+Повторяет паттерн `gateway.yaml`: сборка кастомного образа с `caddy-l4` и пуш в GHCR, затем SCP файлов `relay/` на VDSINA и SSH для запуска `docker compose up -d`. Шаг сборки нужен — образ кастомный.
 
 **Новые GitHub Secrets:**
 
@@ -50,7 +51,7 @@ Reality и Shadowsocks расшифровываются на основном с
 | `RELAY_HOST` | IP московского сервера VDSINA |
 | `RELAY_USER` | SSH-пользователь на VDSINA |
 | `RELAY_SSH_KEY` | SSH-ключ для VDSINA |
-| `MAIN_SERVER_IP` | IP основного сервера (подставляется в nginx.conf) |
+| `MAIN_SERVER_IP` | IP основного сервера (подставляется в caddy.json) |
 | `RELAY_REALITY_PORT` | Порт Reality inbound на основном сервере |
 | `RELAY_SS_PORT` | Порт Shadowsocks inbound на основном сервере |
 
