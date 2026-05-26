@@ -11,6 +11,6 @@ final readonly class SupportHandler
     public function __invoke(Nutgram $bot): void
     {
         $bot->answerCallbackQuery();
-        $bot->sendMessage("По всем вопросам пиши: @moildar");
+        $bot->sendMessage("По всем вопросам пишите @moildar либо на почту: web.udm@gmail.com");
     }
 }
