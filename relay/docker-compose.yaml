@@ -1,0 +1,10 @@
+services:
+  relay:
+    image: ghcr.io/web-udm/white-vpn-relay:latest
+    container_name: relay_caddy
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      MAIN_SERVER_IP: ${MAIN_SERVER_IP}
+      RELAY_REALITY_PORT: ${RELAY_REALITY_PORT}
+      RELAY_SS_PORT: ${RELAY_SS_PORT}
