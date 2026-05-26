@@ -15,14 +15,14 @@
             }
           ]
         },
-        "relay_reality": {
-          "listen": [":${RELAY_REALITY_PORT}"],
+        "relay_vless": {
+          "listen": [":${RELAY_VLESS_PORT}"],
           "routes": [
             {
               "handle": [
                 {
                   "handler": "proxy",
-                  "upstreams": [{"dial": ["tcp://${DEPLOY_HOST}:${RELAY_REALITY_PORT}"]}]
+                  "upstreams": [{"dial": ["tcp://${DEPLOY_HOST}:${RELAY_VLESS_PORT}"]}]
                 }
               ]
             }

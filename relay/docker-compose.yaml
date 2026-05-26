@@ -6,6 +6,6 @@ services:
     restart: unless-stopped
     environment:
       DEPLOY_HOST: ${DEPLOY_HOST}
-      RELAY_REALITY_PORT: ${RELAY_REALITY_PORT}
+      RELAY_VLESS_PORT: ${RELAY_VLESS_PORT}
       RELAY_TROJAN_PORT: ${RELAY_TROJAN_PORT}
       RELAY_SS_PORT: ${RELAY_SS_PORT}

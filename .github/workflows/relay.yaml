@@ -65,7 +65,7 @@ jobs:
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             cat > /app/relay/.env << EOF
             DEPLOY_HOST=${{ secrets.DEPLOY_HOST }}
-            RELAY_REALITY_PORT=${{ secrets.RELAY_REALITY_PORT }}
+            RELAY_VLESS_PORT=${{ secrets.RELAY_VLESS_PORT }}
             RELAY_TROJAN_PORT=${{ secrets.RELAY_TROJAN_PORT }}
             RELAY_SS_PORT=${{ secrets.RELAY_SS_PORT }}
             EOF
