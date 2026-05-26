@@ -1,83 +1,83 @@
-# Design: Moscow Relay Server (VDSINA)
+# Дизайн: московский relay-сервер (VDSINA)
 
-## Problem
+## Проблема
 
-The main VPN server IP is fully blocked by Russian ISPs — even the admin panel and subscription URLs are inaccessible without VPN. Clients using Reality (VLESS/Trojan) and the subscription service cannot connect.
+IP основного VPN-сервера полностью заблокирован российскими провайдерами — без VPN недоступны ни панель администратора, ни subscription URL'ы. Клиенты не могут подключиться через Reality (VLESS/Trojan) и обновить подписки.
 
-## Solution
+## Решение
 
-Add a TCP relay service running on a VDSINA server in Moscow. Russian clients connect to the Moscow IP; the relay forwards raw TCP bytes to the main server. No TLS termination, no protocol awareness — pure L4 passthrough.
+Запустить TCP relay на сервере VDSINA в Москве. Российские клиенты подключаются к московскому IP; relay пробрасывает сырые TCP-байты на основной сервер. Без расшифровки TLS, без анализа протокола — чистый L4 passthrough.
 
-## Architecture
+## Архитектура
 
 ```
-Client (Russia)
+Клиент (Россия)
     │ TCP
     ▼
-VDSINA Moscow (relay/)
-  :443            ──TCP relay──► Main Server :443 (Caddy — panel, sub, bot)
-  :REALITY_PORT   ──TCP relay──► Main Server :REALITY_PORT (3x-ui Reality)
-  :SS_PORT TCP    ──TCP relay──► Main Server :SS_PORT (3x-ui Shadowsocks)
-  :SS_PORT UDP    ──UDP relay──► Main Server :SS_PORT (3x-ui Shadowsocks)
+VDSINA Москва (relay/)
+  :443            ──TCP relay──► Основной сервер :443 (Caddy — панель, sub, bot)
+  :REALITY_PORT   ──TCP relay──► Основной сервер :REALITY_PORT (3x-ui Reality)
+  :SS_PORT TCP    ──TCP relay──► Основной сервер :SS_PORT (3x-ui Shadowsocks)
+  :SS_PORT UDP    ──UDP relay──► Основной сервер :SS_PORT (3x-ui Shadowsocks)
 ```
 
-Reality and Shadowsocks are decrypted on the main server — the Moscow relay never sees plaintext traffic.
+Reality и Shadowsocks расшифровываются на основном сервере — московский relay трафик не видит.
 
-## Components
+## Компоненты
 
-### relay/ service
+### relay/ сервис
 
-**Files:**
-- `relay/docker-compose.yaml` — runs `nginx:alpine` with stream config
-- `relay/nginx.conf` — L4 TCP/UDP proxy config
+**Файлы:**
+- `relay/docker-compose.yaml` — запускает `nginx:alpine` со stream-конфигом
+- `relay/nginx.conf` — L4 TCP/UDP proxy конфиг
 
-**nginx stream config** routes by port:
+**nginx stream** маршрутизирует по портам:
 - `443 TCP` → `$MAIN_SERVER_IP:443`
 - `$REALITY_PORT TCP` → `$MAIN_SERVER_IP:$REALITY_PORT`
 - `$SS_PORT TCP` → `$MAIN_SERVER_IP:$SS_PORT`
 - `$SS_PORT UDP` → `$MAIN_SERVER_IP:$SS_PORT`
 
-Environment variables are substituted via `envsubst` at container startup (Docker entrypoint).
+Переменные окружения подставляются через `envsubst` при старте контейнера.
 
 ### .github/workflows/relay.yaml
 
-Mirrors the pattern of existing workflows (e.g. `3x-ui.yaml`): SCP `relay/` files to VDSINA, SSH to run `docker compose up -d`. No image build step — uses `nginx:alpine` directly.
+Повторяет паттерн существующих workflows (например `3x-ui.yaml`): SCP файлов `relay/` на VDSINA, SSH для запуска `docker compose up -d`. Шаг сборки образа не нужен — используется `nginx:alpine` напрямую.
 
-**New GitHub Secrets required:**
+**Новые GitHub Secrets:**
 
-| Secret | Description |
-|--------|-------------|
-| `RELAY_HOST` | VDSINA server IP |
-| `RELAY_USER` | SSH username on VDSINA |
-| `RELAY_SSH_KEY` | SSH private key for VDSINA |
-| `MAIN_SERVER_IP` | IP of the main server (injected into nginx.conf) |
-| `RELAY_REALITY_PORT` | Reality inbound port on main server |
-| `RELAY_SS_PORT` | Shadowsocks inbound port on main server |
+| Secret | Описание |
+|--------|----------|
+| `RELAY_HOST` | IP московского сервера VDSINA |
+| `RELAY_USER` | SSH-пользователь на VDSINA |
+| `RELAY_SSH_KEY` | SSH-ключ для VDSINA |
+| `MAIN_SERVER_IP` | IP основного сервера (подставляется в nginx.conf) |
+| `RELAY_REALITY_PORT` | Порт Reality inbound на основном сервере |
+| `RELAY_SS_PORT` | Порт Shadowsocks inbound на основном сервере |
 
 ### Shadowsocks inbound
 
-Add a Shadowsocks inbound in the existing 3x-ui panel on the main server. No new Docker service needed — 3x-ui natively supports Shadowsocks inbounds. The inbound port must match `RELAY_SS_PORT`.
+Добавить Shadowsocks inbound в существующую панель 3x-ui на основном сервере. Новый Docker-сервис не нужен — 3x-ui нативно поддерживает Shadowsocks. Порт inbound должен совпадать с `RELAY_SS_PORT`.
 
-### DNS update
+### Обновление DNS
 
-After relay is deployed: update A-records for VPN-related domains to point to the VDSINA Moscow IP. Subscription URLs and client configs require no changes — domains stay the same.
+После деплоя relay: перевести A-записи VPN-доменов на IP московского сервера VDSINA. Subscription URL'ы и клиентские конфиги менять не нужно — домены остаются прежними.
 
-| Domain | New A record |
-|--------|-------------|
-| `sub.whitevpn.tech` | VDSINA IP |
-| `panel.whitevpn.tech` | VDSINA IP |
-| `bot-prod.whitevpn.tech` | VDSINA IP |
-| `awg.whitevpn.tech` | VDSINA IP |
-| `hy2.whitevpn.tech` | VDSINA IP |
+| Домен | Новая A-запись |
+|-------|---------------|
+| `sub.whitevpn.tech` | IP VDSINA |
+| `panel.whitevpn.tech` | IP VDSINA |
+| `bot-prod.whitevpn.tech` | IP VDSINA |
+| `awg.whitevpn.tech` | IP VDSINA |
+| `hy2.whitevpn.tech` | IP VDSINA |
 
-## What Is Not Changing
+## Что не меняется
 
-- Main server setup: no changes to 3x-ui, Caddy, or other services
-- Subscription URLs: same domains, transparent to clients
-- AmneziaWG: UDP is blocked by Russian ISPs — relay doesn't help, service left as-is
+- Основной сервер: без изменений в 3x-ui, Caddy и других сервисах
+- Subscription URL'ы: те же домены, прозрачно для клиентов
+- AmneziaWG: UDP блокируется провайдерами, relay не поможет, сервис остаётся как есть
 
-## Out of Scope
+## За рамками задачи
 
-- AmneziaWG relay (UDP blocked, never worked)
-- Hysteria2 relay (currently disabled)
-- Rate limiting or access control on the relay
+- Relay для AmneziaWG (UDP заблокирован, никогда не работал)
+- Relay для Hysteria2 (сервис отключён)
+- Rate limiting и контроль доступа на relay
