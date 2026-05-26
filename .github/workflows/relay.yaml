@@ -1,0 +1,74 @@
+name: Relay CI/CD
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - relay/**
+  workflow_dispatch:
+
+env:
+  IMAGE: ghcr.io/web-udm/white-vpn-relay
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./relay
+          file: ./relay/Dockerfile
+          push: true
+          tags: ${{ env.IMAGE }}:latest
+          cache-from: type=registry,ref=${{ env.IMAGE }}:cache
+          cache-to: type=registry,ref=${{ env.IMAGE }}:cache,mode=max
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Copy files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.RELAY_HOST }}
+          username: ${{ secrets.RELAY_USER }}
+          key: ${{ secrets.RELAY_SSH_KEY }}
+          source: "relay/docker-compose.yaml,relay/caddy.json.template"
+          target: /app
+          strip_components: 0
+
+      - name: Deploy
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.RELAY_HOST }}
+          username: ${{ secrets.RELAY_USER }}
+          key: ${{ secrets.RELAY_SSH_KEY }}
+          script: |
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            cat > /app/relay/.env << EOF
+            MAIN_SERVER_IP=${{ secrets.MAIN_SERVER_IP }}
+            RELAY_REALITY_PORT=${{ secrets.RELAY_REALITY_PORT }}
+            RELAY_SS_PORT=${{ secrets.RELAY_SS_PORT }}
+            EOF
+            cd /app/relay
+            docker compose pull
+            docker compose down
+            docker compose up -d
