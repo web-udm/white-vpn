@@ -5,6 +5,7 @@ services:
     network_mode: host
     restart: unless-stopped
     environment:
-      MAIN_SERVER_IP: ${MAIN_SERVER_IP}
+      DEPLOY_HOST: ${DEPLOY_HOST}
       RELAY_REALITY_PORT: ${RELAY_REALITY_PORT}
+      RELAY_TROJAN_PORT: ${RELAY_TROJAN_PORT}
       RELAY_SS_PORT: ${RELAY_SS_PORT}

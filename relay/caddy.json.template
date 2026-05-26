@@ -9,7 +9,7 @@
               "handle": [
                 {
                   "handler": "proxy",
-                  "upstreams": [{"dial": ["tcp://${MAIN_SERVER_IP}:443"]}]
+                  "upstreams": [{"dial": ["tcp://${DEPLOY_HOST}:443"]}]
                 }
               ]
             }
@@ -22,7 +22,20 @@
               "handle": [
                 {
                   "handler": "proxy",
-                  "upstreams": [{"dial": ["tcp://${MAIN_SERVER_IP}:${RELAY_REALITY_PORT}"]}]
+                  "upstreams": [{"dial": ["tcp://${DEPLOY_HOST}:${RELAY_REALITY_PORT}"]}]
+                }
+              ]
+            }
+          ]
+        },
+        "relay_trojan": {
+          "listen": [":${RELAY_TROJAN_PORT}"],
+          "routes": [
+            {
+              "handle": [
+                {
+                  "handler": "proxy",
+                  "upstreams": [{"dial": ["tcp://${DEPLOY_HOST}:${RELAY_TROJAN_PORT}"]}]
                 }
               ]
             }
@@ -35,7 +48,7 @@
               "handle": [
                 {
                   "handler": "proxy",
-                  "upstreams": [{"dial": ["tcp://${MAIN_SERVER_IP}:${RELAY_SS_PORT}"]}]
+                  "upstreams": [{"dial": ["tcp://${DEPLOY_HOST}:${RELAY_SS_PORT}"]}]
                 }
               ]
             }
@@ -48,7 +61,7 @@
               "handle": [
                 {
                   "handler": "proxy",
-                  "upstreams": [{"dial": ["udp://${MAIN_SERVER_IP}:${RELAY_SS_PORT}"]}]
+                  "upstreams": [{"dial": ["udp://${DEPLOY_HOST}:${RELAY_SS_PORT}"]}]
                 }
               ]
             }
