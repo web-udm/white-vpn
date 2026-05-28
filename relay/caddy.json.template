@@ -67,6 +67,32 @@
             }
           ]
         },
+        "relay_xhttp": {
+          "listen": [":${RELAY_XHTTP_PORT}"],
+          "routes": [
+            {
+              "handle": [
+                {
+                  "handler": "proxy",
+                  "upstreams": [{"dial": ["tcp/${DEPLOY_HOST}:${RELAY_XHTTP_PORT}"]}]
+                }
+              ]
+            }
+          ]
+        },
+        "relay_grpc": {
+          "listen": [":${RELAY_GRPC_PORT}"],
+          "routes": [
+            {
+              "handle": [
+                {
+                  "handler": "proxy",
+                  "upstreams": [{"dial": ["tcp/${DEPLOY_HOST}:${RELAY_GRPC_PORT}"]}]
+                }
+              ]
+            }
+          ]
+        },
         "relay_awg_udp": {
           "listen": ["udp/:${RELAY_AWG_PORT}"],
           "routes": [
