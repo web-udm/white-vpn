@@ -69,6 +69,8 @@ jobs:
             RELAY_TROJAN_PORT=${{ secrets.RELAY_TROJAN_PORT }}
             RELAY_SS_PORT=${{ secrets.RELAY_SS_PORT }}
             RELAY_AWG_PORT=${{ secrets.RELAY_AWG_PORT }}
+            RELAY_XHTTP_PORT=${{ secrets.RELAY_XHTTP_PORT }}
+            RELAY_GRPC_PORT=${{ secrets.RELAY_GRPC_PORT }}
             EOF
             cd /app/relay
             docker compose pull
