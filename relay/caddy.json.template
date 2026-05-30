@@ -118,6 +118,19 @@
               ]
             }
           ]
+        },
+        "relay_hy2_udp": {
+          "listen": ["udp/:${RELAY_HY2_PORT}"],
+          "routes": [
+            {
+              "handle": [
+                {
+                  "handler": "proxy",
+                  "upstreams": [{"dial": ["udp/${DEPLOY_HOST}:${RELAY_HY2_PORT}"]}]
+                }
+              ]
+            }
+          ]
         }
       }
     }

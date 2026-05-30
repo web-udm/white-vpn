@@ -72,6 +72,7 @@ jobs:
             RELAY_XHTTP_PORT=${{ secrets.RELAY_XHTTP_PORT }}
             RELAY_GRPC_PORT=${{ secrets.RELAY_GRPC_PORT }}
             RELAY_WS_PORT=${{ secrets.RELAY_WS_PORT }}
+            RELAY_HY2_PORT=${{ secrets.HYSTERIA2_PORT }}
             EOF
             cd /app/relay
             docker compose pull
