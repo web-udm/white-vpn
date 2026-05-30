@@ -93,6 +93,19 @@
             }
           ]
         },
+        "relay_ws": {
+          "listen": [":${RELAY_WS_PORT}"],
+          "routes": [
+            {
+              "handle": [
+                {
+                  "handler": "proxy",
+                  "upstreams": [{"dial": ["tcp/${DEPLOY_HOST}:${RELAY_WS_PORT}"]}]
+                }
+              ]
+            }
+          ]
+        },
         "relay_awg_udp": {
           "listen": ["udp/:${RELAY_AWG_PORT}"],
           "routes": [
