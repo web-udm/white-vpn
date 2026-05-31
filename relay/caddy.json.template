@@ -28,45 +28,6 @@
             }
           ]
         },
-        "relay_trojan": {
-          "listen": [":${RELAY_TROJAN_PORT}"],
-          "routes": [
-            {
-              "handle": [
-                {
-                  "handler": "proxy",
-                  "upstreams": [{"dial": ["tcp/${DEPLOY_HOST}:${RELAY_TROJAN_PORT}"]}]
-                }
-              ]
-            }
-          ]
-        },
-        "relay_ss_tcp": {
-          "listen": [":${RELAY_SS_PORT}"],
-          "routes": [
-            {
-              "handle": [
-                {
-                  "handler": "proxy",
-                  "upstreams": [{"dial": ["tcp/${DEPLOY_HOST}:${RELAY_SS_PORT}"]}]
-                }
-              ]
-            }
-          ]
-        },
-        "relay_ss_udp": {
-          "listen": ["udp/:${RELAY_SS_PORT}"],
-          "routes": [
-            {
-              "handle": [
-                {
-                  "handler": "proxy",
-                  "upstreams": [{"dial": ["udp/${DEPLOY_HOST}:${RELAY_SS_PORT}"]}]
-                }
-              ]
-            }
-          ]
-        },
         "relay_xhttp": {
           "listen": [":${RELAY_XHTTP_PORT}"],
           "routes": [
@@ -101,6 +62,19 @@
                 {
                   "handler": "proxy",
                   "upstreams": [{"dial": ["udp/${DEPLOY_HOST}:${RELAY_AWG_PORT}"]}]
+                }
+              ]
+            }
+          ]
+        },
+        "relay_hysteria": {
+          "listen": ["udp/:${RELAY_HYSTERIA_PORT}"],
+          "routes": [
+            {
+              "handle": [
+                {
+                  "handler": "proxy",
+                  "upstreams": [{"dial": ["udp/${DEPLOY_HOST}:${RELAY_HYSTERIA_PORT}"]}]
                 }
               ]
             }
