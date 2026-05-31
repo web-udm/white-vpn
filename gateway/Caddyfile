@@ -3,9 +3,6 @@ bot-prod.whitevpn.tech {
 }
 
 panel.whitevpn.tech {
-	basicauth {
-		admin $2a$14$VeniphkLgJEOC3Pq0tr9je6o2s5rVdMXiRDLQWXn9xpThpUUeNrR6
-	}
 	reverse_proxy localhost:2053
 }
 
