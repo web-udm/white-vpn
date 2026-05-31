@@ -20,17 +20,8 @@ final class XuiVPNProviderTest extends TestCase
             httpClient: $mockClient,
             baseUrl: 'https://panel.example.com',
             subscriptionUrl: 'https://sub.example.com',
-            username: 'admin',
-            password: 'secret',
+            apiToken: 'test-token',
             inboundIds: $inboundIds,
-        );
-    }
-
-    private function loginResponse(): MockResponse
-    {
-        return new MockResponse(
-            json_encode(['success' => true, 'msg' => 'ok']),
-            ['http_code' => 200, 'response_headers' => ['set-cookie' => '3x-ui=abc123; Path=/']],
         );
     }
 
@@ -38,12 +29,11 @@ final class XuiVPNProviderTest extends TestCase
     {
         // Arrange
         $provider = $this->createProvider([
-            $this->loginResponse(),
             new MockResponse(json_encode(['success' => true, 'msg' => 'ok'])),
         ]);
 
         // Act & Assert (no exception = success)
-        $provider->createClient('some-uuid', 1, 3);
+        $provider->createClient('some-uuid', [1], 3);
         $this->addToAssertionCount(1);
     }
 
@@ -51,7 +41,6 @@ final class XuiVPNProviderTest extends TestCase
     {
         // Arrange
         $provider = $this->createProvider([
-            $this->loginResponse(),
             new MockResponse(json_encode(['success' => false, 'msg' => 'client already exists'])),
         ]);
 
@@ -60,7 +49,7 @@ final class XuiVPNProviderTest extends TestCase
         $this->expectExceptionMessage('client already exists');
 
         // Act
-        $provider->createClient('some-uuid', 1);
+        $provider->createClient('some-uuid', [1]);
     }
 
     public function testGetInboundIds(): void
@@ -84,36 +73,18 @@ final class XuiVPNProviderTest extends TestCase
         $this->assertSame('https://sub.example.com/sub/some-uuid', $url);
     }
 
-    public function testReauthenticatesOn401(): void
+    public function testEmptyResponseBodyThrows(): void
     {
         // Arrange
         $provider = $this->createProvider([
-            $this->loginResponse(),
-            new MockResponse('', ['http_code' => 401]),
-            $this->loginResponse(),
-            new MockResponse(json_encode(['success' => true, 'msg' => 'ok'])),
-        ]);
-
-        // Act & Assert (no exception = success after re-auth)
-        $provider->createClient('some-uuid', 1);
-        $this->addToAssertionCount(1);
-    }
-
-    public function testLoginFailureThrows(): void
-    {
-        // Arrange
-        $provider = $this->createProvider([
-            new MockResponse(
-                json_encode(['success' => false, 'msg' => 'invalid credentials']),
-                ['http_code' => 200],
-            ),
+            new MockResponse('', ['http_code' => 403]),
         ]);
 
         // Assert
         $this->expectException(VPNException::class);
-        $this->expectExceptionMessage('invalid credentials');
+        $this->expectExceptionMessage('Failed to parse 3x-ui response');
 
         // Act
-        $provider->createClient('some-uuid', 1);
+        $provider->createClient('some-uuid', [1]);
     }
 }

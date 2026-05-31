@@ -48,7 +48,7 @@ final class AddClientsToInboundCommand extends Command
             $externalId = $connection->getExternalId();
 
             try {
-                $this->vpnProvider->createClient($externalId, $inboundId, limitIp: 3, expiryTimestamp: 0);
+                $this->vpnProvider->createClient($externalId, [$inboundId], limitIp: 3, expiryTimestamp: 0);
                 $output->writeln(sprintf('[%d/%d] OK: %s', $i + 1, $total, $externalId));
                 $success++;
             } catch (\Throwable $e) {

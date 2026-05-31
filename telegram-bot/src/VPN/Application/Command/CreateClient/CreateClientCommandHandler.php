@@ -19,6 +19,7 @@ final readonly class CreateClientCommandHandler
     {
         $this->vpnProvider->createClient(
             $command->subID,
+            $this->vpnProvider->getInboundIds(),
             $command->limitIP,
             $command->expiryTimestamp,
         );

@@ -1,6 +1,5 @@
 parameters:
     xui.base_url: '%env(XUI_BASE_URL)%'
     xui.subscription_url: '%env(XUI_SUBSCRIPTION_URL)%'
-    xui.username: '%env(XUI_USERNAME)%'
-    xui.password: '%env(XUI_PASSWORD)%'
+    xui.api_token: '%env(XUI_API_TOKEN)%'
     xui.inbound_ids: '%env(json:XUI_INBOUND_IDS)%'

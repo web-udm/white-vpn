@@ -24,9 +24,7 @@ final readonly class CreateVpnConnectionCommandHandler
         $subId = self::generateSubId();
         $expiryTimestamp = $command->expiresAt->getTimestamp() * 1000;
 
-        foreach ($this->vpnProvider->getInboundIds() as $inboundId) {
-            $this->vpnProvider->createClient($subId, $inboundId, $command->limitIp, $expiryTimestamp);
-        }
+        $this->vpnProvider->createClient($subId, $this->vpnProvider->getInboundIds(), $command->limitIp, $expiryTimestamp);
 
         $connection = new VpnConnection(
             $command->subscriptionId,
