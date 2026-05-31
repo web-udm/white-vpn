@@ -5,6 +5,7 @@ services:
     volumes:
       - caddy_data:/data
       - caddy_config:/config
+      - /var/lib/docker/volumes/gateway_caddy_data/_data/caddy/certificates/acme-v02.api.letsencrypt.org-directory:/etc/caddy-certs:ro
     network_mode: host
     restart: unless-stopped
 #test

@@ -5,6 +5,7 @@ services:
     volumes:
       - ./db/:/etc/x-ui/
       - ./cert/:/root/cert/
+      - /var/lib/docker/volumes/gateway_caddy_data/_data/caddy/certificates/acme-v02.api.letsencrypt.org-directory:/etc/caddy-certs:ro
     environment:
       XRAY_VMESS_AEAD_FORCED: "false"
       XUI_ENABLE_FAIL2BAN: "true"
