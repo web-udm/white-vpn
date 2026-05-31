@@ -1,4 +1,4 @@
-listen: 0.0.0.0:20000-50000
+listen: "0.0.0.0:%%HY2_PORT%%"
 
 acme:
   domains:

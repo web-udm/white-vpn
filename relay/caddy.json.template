@@ -67,7 +67,33 @@
             }
           ]
         },
-        "relay_hysteria": {
+        "relay_ws": {
+          "listen": [":${RELAY_WS_PORT}"],
+          "routes": [
+            {
+              "handle": [
+                {
+                  "handler": "proxy",
+                  "upstreams": [{"dial": ["tcp/${DEPLOY_HOST}:${RELAY_WS_PORT}"]}]
+                }
+              ]
+            }
+          ]
+        },
+        "relay_awg_udp": {
+          "listen": ["udp/:${RELAY_AWG_PORT}"],
+          "routes": [
+            {
+              "handle": [
+                {
+                  "handler": "proxy",
+                  "upstreams": [{"dial": ["udp/${DEPLOY_HOST}:${RELAY_HYSTERIA_PORT}"]}]
+                }
+              ]
+            }
+          ]
+        },
+         "relay_hysteria": {
           "listen": ["udp/:${RELAY_HYSTERIA_PORT}"],
           "routes": [
             {

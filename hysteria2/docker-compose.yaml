@@ -1,7 +1,5 @@
 services:
   hysteria2:
-    profiles:
-      - disabled
     image: tobyxdd/hysteria:latest
     container_name: hysteria2
     network_mode: host

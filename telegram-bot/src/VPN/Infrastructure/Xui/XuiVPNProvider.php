@@ -8,10 +8,12 @@ use App\VPN\Domain\VPNProviderInterface;
 use App\VPN\Port\VPNException;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 final class XuiVPNProvider implements VPNProviderInterface
 {
     private ?string $sessionCookie = null;
+    private ?string $csrfToken = null;
 
     /**
      * @param int[] $inboundIds
@@ -26,32 +28,22 @@ final class XuiVPNProvider implements VPNProviderInterface
     ) {
     }
 
-    public function createClient(string $subId, int $inboundId, int $limitIp = 3, int $expiryTimestamp = 0): void
+    /** @param int[] $inboundIds */
+    public function createClient(string $subId, array $inboundIds, int $limitIp = 3, int $expiryTimestamp = 0): void
     {
-        $uuid = $this->generateUuid();
-        $email = $this->buildEmail($subId, $inboundId);
-
-        $clientSettings = json_encode([
-            'clients' => [[
-                'id' => $uuid,
-                'password' => $uuid, // Trojan inbounds use password instead of id
-                'email' => $email,
-                'limitIp' => $limitIp,
-                'totalGB' => 0,
-                'expiryTime' => $expiryTimestamp,
-                'enable' => true,
-                'flow' => '',
-                'tgId' => '',
-                'subId' => $subId,
-                'comment' => '',
-                'reset' => 0,
-            ]],
-        ], JSON_THROW_ON_ERROR);
-
-        $response = $this->request('POST', '/panel/api/inbounds/addClient', [
+        $response = $this->request('POST', '/panel/api/clients/add', [
             'json' => [
-                'id' => $inboundId,
-                'settings' => $clientSettings,
+                'client' => [
+                    'email'      => $subId,
+                    'subId'      => $subId,
+                    'limitIp'   => $limitIp,
+                    'totalGB'   => 0,
+                    'expiryTime' => $expiryTimestamp,
+                    'tgId'      => 0,
+                    'enable'    => true,
+                    'reset'     => 0,
+                ],
+                'inboundIds' => $inboundIds,
             ],
         ]);
 
@@ -77,81 +69,103 @@ final class XuiVPNProvider implements VPNProviderInterface
      */
     private function request(string $method, string $path, array $options = []): array
     {
-        $this->ensureAuthenticated();
-
-        $response = $this->doRequest($method, $path, $options);
-
-        if ($response->getStatusCode() === 401) {
-            $this->sessionCookie = null;
+        try {
             $this->ensureAuthenticated();
             $response = $this->doRequest($method, $path, $options);
-        }
 
-        try {
-            return $response->toArray(false);
-        } catch (\Throwable $e) {
-            throw new VPNException('Failed to parse 3x-ui response: ' . $e->getMessage(), 0, $e);
-        }
-    }
-
-    private function ensureAuthenticated(): void
-    {
-        if ($this->sessionCookie !== null) {
-            return;
-        }
-
-        $response = $this->httpClient->request('POST', $this->baseUrl . '/login', [
-            'json' => [
-                'username' => $this->username,
-                'password' => $this->password,
-            ],
-        ]);
-
-        $headers = $response->getHeaders(false);
-        $cookies = $headers['set-cookie'] ?? [];
-
-        foreach ($cookies as $cookie) {
-            if (str_starts_with($cookie, '3x-ui=') || str_starts_with($cookie, 'session=')) {
-                $this->sessionCookie = explode(';', $cookie)[0];
-                return;
+            if ($response->getStatusCode() === 403) {
+                $this->invalidateSession();
+                $this->ensureAuthenticated();
+                $response = $this->doRequest($method, $path, $options);
             }
+
+            return $response->toArray(false);
+        } catch (VPNException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            throw new VPNException('3x-ui request failed: ' . $e->getMessage(), 0, $e);
         }
-
-        $data = $response->toArray(false);
-
-        if (!($data['success'] ?? false)) {
-            throw new VPNException('3x-ui login failed: ' . ($data['msg'] ?? 'unknown error'));
-        }
-
-        throw new VPNException('3x-ui login succeeded but no session cookie received');
     }
 
     /**
      * @param array<string, mixed> $options
      */
-    private function doRequest(string $method, string $path, array $options = []): \Symfony\Contracts\HttpClient\ResponseInterface
+    private function doRequest(string $method, string $path, array $options): ResponseInterface
     {
         $options['headers'] = array_merge($options['headers'] ?? [], [
-            'Cookie' => $this->sessionCookie,
+            'Cookie'       => $this->sessionCookie,
+            'X-CSRF-Token' => $this->csrfToken,
         ]);
 
-        return $this->httpClient->request($method, $this->baseUrl . $path, $options);
+        return $this->httpClient->request($method, rtrim($this->baseUrl, '/') . $path, $options);
     }
 
-    private function buildEmail(string $subId, int $inboundId): string
+    private function ensureAuthenticated(): void
     {
-        return $subId . '_' . $inboundId;
+        if ($this->sessionCookie !== null && $this->csrfToken !== null) {
+            return;
+        }
+        $this->login();
     }
 
-    private function generateUuid(): string
+    private function invalidateSession(): void
     {
-        $data = random_bytes(16);
-        $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
-        $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
+        $this->sessionCookie = null;
+        $this->csrfToken = null;
+    }
 
-        return $data
-                |> bin2hex(...)
-                |> (fn($x) => str_split($x, 4))
-                |> (fn($x) => vsprintf('%s%s-%s-%s-%s-%s%s%s', $x));
+    private function login(): void
+    {
+        try {
+            $base = rtrim($this->baseUrl, '/');
+
+            $pageResponse = $this->httpClient->request('GET', $base . '/');
+            $html = $pageResponse->getContent(false);
+
+            if (!preg_match('/<meta name="csrf-token" content="([^"]+)"/', $html, $matches)) {
+                throw new VPNException('Failed to extract CSRF token from 3x-ui panel page');
+            }
+            $csrfToken = $matches[1];
+            $initialCookie = $this->parseCookieHeader($pageResponse->getHeaders(false)['set-cookie'] ?? []);
+
+            $loginResponse = $this->httpClient->request('POST', $base . '/login', [
+                'json' => ['username' => $this->username, 'password' => $this->password],
+                'headers' => [
+                    'X-CSRF-Token' => $csrfToken,
+                    'Cookie'       => $initialCookie,
+                ],
+            ]);
+
+            $body = $loginResponse->toArray(false);
+            if (!($body['success'] ?? false)) {
+                throw new VPNException('3x-ui login failed: ' . ($body['msg'] ?? 'unknown error'));
+            }
+
+            $sessionCookie = $this->parseCookieHeader($loginResponse->getHeaders(false)['set-cookie'] ?? [])
+                ?? $initialCookie;
+
+            if ($sessionCookie === null) {
+                throw new VPNException('No session cookie received from 3x-ui after login');
+            }
+
+            $this->sessionCookie = $sessionCookie;
+            $this->csrfToken = $csrfToken;
+        } catch (VPNException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            throw new VPNException('3x-ui login failed: ' . $e->getMessage(), 0, $e);
+        }
+    }
+
+    /** @param string[] $setCookieHeaders */
+    private function parseCookieHeader(array $setCookieHeaders): ?string
+    {
+        foreach ($setCookieHeaders as $header) {
+            if (preg_match('/(3x-ui=[^;]+)/', $header, $matches)) {
+                return $matches[1];
+            }
+        }
+
+        return null;
     }
 }
