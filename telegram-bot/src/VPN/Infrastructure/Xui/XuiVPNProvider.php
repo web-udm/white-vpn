@@ -8,7 +8,6 @@ use App\VPN\Domain\VPNProviderInterface;
 use App\VPN\Port\VPNException;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Symfony\Contracts\HttpClient\ResponseInterface;
 
 final class XuiVPNProvider implements VPNProviderInterface
 {
