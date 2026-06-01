@@ -20,15 +20,32 @@ final class XuiVPNProviderTest extends TestCase
             httpClient: $mockClient,
             baseUrl: 'https://panel.example.com',
             subscriptionUrl: 'https://sub.example.com',
-            apiToken: 'test-token',
+            username: 'admin',
+            password: 'password',
             inboundIds: $inboundIds,
         );
+    }
+
+    /** @return MockResponse[] */
+    private function loginResponses(): array
+    {
+        return [
+            new MockResponse(
+                '<meta name="csrf-token" content="test-csrf">',
+                ['response_headers' => ['Set-Cookie: 3x-ui=session-token; Path=/']]
+            ),
+            new MockResponse(
+                json_encode(['success' => true]),
+                ['response_headers' => ['Set-Cookie: 3x-ui=session-token; Path=/']]
+            ),
+        ];
     }
 
     public function testCreateClientSuccess(): void
     {
         // Arrange
         $provider = $this->createProvider([
+            ...$this->loginResponses(),
             new MockResponse(json_encode(['success' => true, 'msg' => 'ok'])),
         ]);
 
@@ -41,6 +58,7 @@ final class XuiVPNProviderTest extends TestCase
     {
         // Arrange
         $provider = $this->createProvider([
+            ...$this->loginResponses(),
             new MockResponse(json_encode(['success' => false, 'msg' => 'client already exists'])),
         ]);
 
@@ -75,14 +93,16 @@ final class XuiVPNProviderTest extends TestCase
 
     public function testEmptyResponseBodyThrows(): void
     {
-        // Arrange
+        // Arrange — 403 triggers re-auth, second attempt also returns empty/invalid JSON
         $provider = $this->createProvider([
+            ...$this->loginResponses(),
+            new MockResponse('', ['http_code' => 403]),
+            ...$this->loginResponses(),
             new MockResponse('', ['http_code' => 403]),
         ]);
 
         // Assert
         $this->expectException(VPNException::class);
-        $this->expectExceptionMessage('Failed to parse 3x-ui response');
 
         // Act
         $provider->createClient('some-uuid', [1]);

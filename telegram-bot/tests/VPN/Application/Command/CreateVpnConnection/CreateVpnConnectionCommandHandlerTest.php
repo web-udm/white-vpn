@@ -58,7 +58,7 @@ final class CreateVpnConnectionCommandHandlerTest extends KernelTestCase
         $this->vpnProvider
             ->expects($this->once())
             ->method('createClient')
-            ->willReturnCallback(function (string $subId, array $inboundIds, int $limitIp, int $expiryTs) use (&$capturedSubId): void {
+            ->willReturnCallback(function (string $subId, array $inboundIds, int $limitIp, int $expiryTs) use (&$capturedSubId, $expiryTimestamp): void {
                 $capturedSubId = $subId;
                 $this->assertSame([1, 9], $inboundIds);
                 $this->assertSame(1, $limitIp);
