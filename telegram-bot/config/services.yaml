@@ -17,12 +17,4 @@ services:
     SergiX44\Nutgram\Nutgram:
         factory: ['@App\Telegram\Infrastructure\NutgramFactory', 'create']
 
-    App\VPN\Infrastructure\MTProxy\SyncMtProxySecretsCommand:
-        arguments:
-            $secretsPath: '%mtproxy.secrets_path%'
-
-    App\VPN\Application\Query\GetVpnConnectionURLs\GetVpnConnectionURLsQueryHandler:
-        arguments:
-            $mtproxyHost: '%mtproxy.host%'
-            $mtproxyPort: '%mtproxy.port%'
 

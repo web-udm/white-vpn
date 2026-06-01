@@ -1,4 +1,0 @@
-parameters:
-    mtproxy.host: '%env(MTPROXY_HOST)%'
-    mtproxy.port: '%env(int:MTPROXY_PORT)%'
-    mtproxy.secrets_path: '%env(MTPROXY_SECRETS_PATH)%'

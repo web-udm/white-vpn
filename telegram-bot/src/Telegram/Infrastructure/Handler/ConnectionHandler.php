@@ -43,26 +43,9 @@ final class ConnectionHandler
             return;
         }
 
-        $vpnUrls = array_values(array_filter($urls, fn ($u) => !str_starts_with($u, 'https://t.me/proxy?')));
-        $mtproxyUrls = array_values(array_filter($urls, fn ($u) => str_starts_with($u, 'https://t.me/proxy?')));
-
-        $lines = [];
-
-        if ($vpnUrls !== []) {
-            $lines[] = '*VPN:*';
-            foreach ($vpnUrls as $url) {
-                $lines[] = "`$url`";
-            }
-        }
-
-        if ($mtproxyUrls !== []) {
-            if ($lines !== []) {
-                $lines[] = '';
-            }
-            $lines[] = '*MTProxy* (резервный доступ к Telegram):';
-            foreach ($mtproxyUrls as $url) {
-                $lines[] = $url;
-            }
+        $lines = ['*VPN:*'];
+        foreach ($urls as $url) {
+            $lines[] = "`$url`";
         }
 
         $bot->sendMessage(implode("\n", $lines), parse_mode: 'Markdown');

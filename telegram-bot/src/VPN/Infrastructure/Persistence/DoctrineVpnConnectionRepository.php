@@ -33,28 +33,4 @@ final readonly class DoctrineVpnConnectionRepository implements VpnConnectionRep
     {
         return $this->em->getRepository(VpnConnection::class)->findBy(['type' => $type]);
     }
-
-    public function findAllActiveMtProxySecrets(): array
-    {
-        $sql = "SELECT vc.external_id
-                FROM vpn_connection vc
-                JOIN subscription s ON s.id = vc.subscription_id
-                WHERE vc.type = :type
-                  AND s.status = :status";
-
-        return $this->em->getConnection()->fetchFirstColumn($sql, [
-            'type' => VpnConnection::TYPE_MTPROXY,
-            'status' => 'active',
-        ]);
-    }
-
-    public function hasMtProxyConnection(int $subscriptionId): bool
-    {
-        $count = $this->em->getRepository(VpnConnection::class)->count([
-            'subscriptionId' => $subscriptionId,
-            'type' => VpnConnection::TYPE_MTPROXY,
-        ]);
-
-        return $count > 0;
-    }
 }
