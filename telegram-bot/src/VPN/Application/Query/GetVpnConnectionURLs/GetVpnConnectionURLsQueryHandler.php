@@ -37,7 +37,10 @@ final class GetVpnConnectionURLsQueryHandler
             return [];
         }
 
-        $connections = $this->vpnConnectionRepository->findAllActiveBySubscriptionId($status->subscriptionId);
+        $connections = $this->vpnConnectionRepository->findByTypeAndSubscriptionId(
+            VpnConnection::TYPE_SUBSCRIPTION,
+            $status->subscriptionId,
+        );
 
         return array_map(
             fn (VpnConnection $connection) => $this->vpnProvider->getConnectionURL($connection->getExternalId()),
