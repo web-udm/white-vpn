@@ -7,7 +7,8 @@ export:
 force-internal:
 
 require:
-    - "@subscription"
-    - "@user"
+  - "@subscription"
+  - "@user"
+  - "#nutgram/nutgram"
 
 allow-internal-access:

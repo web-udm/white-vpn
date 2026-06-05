@@ -39,14 +39,14 @@ final readonly class CreateAWGConnectionsCommandHandler
             return;
         }
 
-        for ($index = 1; $index <= self::PEERS_PER_SUBSCRIPTION; $index++) {
-            $this->createPeer($command->subscriptionId, $index);
+        for ($i = 0; $i < self::PEERS_PER_SUBSCRIPTION; $i++) {
+            $this->createPeer($command->subscriptionId);
         }
     }
 
-    private function createPeer(int $subscriptionId, int $index): void
+    private function createPeer(int $subscriptionId): void
     {
-        $name   = $this->generateUuidV4() . '_' . $index;
+        $name   = $this->generateUuidV4();
         $peerId = $this->awgProvider->createPeer($name);
 
         $this->vpnConnectionRepository->save(new VpnConnection(

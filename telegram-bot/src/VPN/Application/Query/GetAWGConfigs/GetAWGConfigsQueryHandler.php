@@ -49,7 +49,7 @@ final class GetAWGConfigsQueryHandler
             $qrCodePng     = $this->awgProvider->generateQrPngFromConfig($configContent);
 
             $result[] = new AWGPeerConfig(
-                filename:      sprintf('whitevpn-%d.conf', $index + 1),
+                filename:      sprintf('awg-%d.conf', $index + 1),
                 configContent: $configContent,
                 qrCodePng:     $qrCodePng,
             );
