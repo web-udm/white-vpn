@@ -15,6 +15,7 @@ use App\Subscription\Port\SubscriptionRequestException;
 use App\User\Application\Command\RegisterUser\RegisterUserCommandHandler;
 use App\User\Infrastructure\Persistence\DoctrineUserRepository;
 use App\User\Port\RegisterUserCommand;
+use App\VPN\Port\CreateAWGConnectionsCommand;
 use App\VPN\Port\CreateVpnConnectionCommand;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -44,7 +45,8 @@ final class ApproveSubscriptionRequestCommandHandlerTest extends KernelTestCase
         $bus = new MessageBus([
             new HandleMessageMiddleware(new HandlersLocator([
                 CreateSubscriptionCommand::class => [$createSubscriptionHandler],
-                CreateVpnConnectionCommand::class => [fn() => null],
+                CreateVpnConnectionCommand::class  => [fn() => null],
+                CreateAWGConnectionsCommand::class => [fn() => null],
             ])),
         ]);
 

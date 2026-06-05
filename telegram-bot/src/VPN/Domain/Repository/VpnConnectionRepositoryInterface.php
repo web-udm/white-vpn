@@ -15,4 +15,7 @@ interface VpnConnectionRepositoryInterface
 
     /** @return VpnConnection[] */
     public function findAllByType(string $type): array;
+
+    /** @return VpnConnection[] */
+    public function findByTypeAndSubscriptionId(string $type, int $subscriptionId): array;
 }

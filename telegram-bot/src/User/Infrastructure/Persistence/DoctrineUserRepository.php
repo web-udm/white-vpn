@@ -24,6 +24,11 @@ final readonly class DoctrineUserRepository implements UserRepositoryInterface
         ]);
     }
 
+    public function findById(int $id): ?User
+    {
+        return $this->entityManager->getRepository(User::class)->find($id);
+    }
+
     public function findAllTelegramIds(): array
     {
         /** @var array<array{telegramId: int}> $rows */

@@ -29,4 +29,11 @@ final readonly class DoctrineSubscriptionRepository implements SubscriptionRepos
             'status' => Subscription::STATUS_ACTIVE,
         ]);
     }
+
+    public function findAllActive(): array
+    {
+        return $this->entityManager->getRepository(Subscription::class)->findBy([
+            'status' => Subscription::STATUS_ACTIVE,
+        ]);
+    }
 }

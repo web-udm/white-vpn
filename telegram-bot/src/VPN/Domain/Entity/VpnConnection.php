@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 class VpnConnection
 {
     public const string TYPE_SUBSCRIPTION = 'subscription';
-    public const string TYPE_WIREGUARD = 'wireguard';
+    public const string TYPE_AMNEZIA_WIREGUARD = 'amnezia_wireguard';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]

@@ -11,4 +11,7 @@ interface SubscriptionRepositoryInterface
     public function save(Subscription $subscription): void;
 
     public function findActiveByUserId(int $userId): ?Subscription;
+
+    /** @return Subscription[] */
+    public function findAllActive(): array;
 }

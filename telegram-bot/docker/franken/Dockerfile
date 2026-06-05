@@ -5,7 +5,8 @@ RUN apk add --no-cache git unzip
 RUN install-php-extensions \
     intl \
     zip \
-    pdo_mysql
+    pdo_mysql \
+    gd
 
 WORKDIR /app
 

@@ -13,6 +13,7 @@ use App\Subscription\Port\SubscriptionRequestException;
 use App\User\Domain\Entity\User;
 use App\User\Domain\Repository\UserRepositoryInterface;
 use App\User\Domain\ValueObject\TelegramId;
+use App\VPN\Port\CreateAWGConnectionsCommand;
 use App\VPN\Port\CreateVpnConnectionCommand;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\HandleTrait;
@@ -46,6 +47,10 @@ final class ApproveSubscriptionRequestCommandHandler
             subscriptionId: $subscriptionId,
             limitIp: $subscription->isVip() ? 10 : 1,
             expiresAt: $expiresAt,
+        ));
+
+        $this->messageBus->dispatch(new CreateAWGConnectionsCommand(
+            subscriptionId: $subscriptionId,
         ));
 
         $request->approve();

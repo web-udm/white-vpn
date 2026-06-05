@@ -1,0 +1,3 @@
+parameters:
+    awg.base_url: '%env(AWG_BASE_URL)%'
+    awg.password: '%env(AWG_PASSWORD)%'

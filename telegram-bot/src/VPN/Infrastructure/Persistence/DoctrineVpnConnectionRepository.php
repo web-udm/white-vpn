@@ -33,4 +33,12 @@ final readonly class DoctrineVpnConnectionRepository implements VpnConnectionRep
     {
         return $this->em->getRepository(VpnConnection::class)->findBy(['type' => $type]);
     }
+
+    public function findByTypeAndSubscriptionId(string $type, int $subscriptionId): array
+    {
+        return $this->em->getRepository(VpnConnection::class)->findBy([
+            'type'           => $type,
+            'subscriptionId' => $subscriptionId,
+        ]);
+    }
 }
