@@ -80,20 +80,7 @@
             }
           ]
         },
-        "relay_awg_udp": {
-          "listen": ["udp/:${RELAY_AWG_PORT}"],
-          "routes": [
-            {
-              "handle": [
-                {
-                  "handler": "proxy",
-                  "upstreams": [{"dial": ["udp/${DEPLOY_HOST}:${RELAY_HYSTERIA_PORT}"]}]
-                }
-              ]
-            }
-          ]
-        },
-         "relay_hysteria": {
+        "relay_hysteria": {
           "listen": ["udp/:${RELAY_HYSTERIA_PORT}"],
           "routes": [
             {
