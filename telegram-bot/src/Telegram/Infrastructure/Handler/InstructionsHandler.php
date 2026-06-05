@@ -33,6 +33,6 @@ final readonly class InstructionsHandler
             );
         }
 
-        $bot->sendMessage(text: '📖 Инструкции:', reply_markup: $keyboard);
+        $bot->sendMessage(text: '❓ F.A.Q.:', reply_markup: $keyboard);
     }
 }

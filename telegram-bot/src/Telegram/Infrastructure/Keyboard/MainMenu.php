@@ -21,6 +21,6 @@ final readonly class MainMenu
         self::STATUS => '📊 Текущий статус',
         self::SUPPORT => '🆘 Поддержка',
         self::GET_CONNECTION => '🔑 Мои подключения',
-        self::INSTRUCTIONS => '📖 Инструкции',
+        self::INSTRUCTIONS => '❓ F.A.Q.',
     ];
 }
