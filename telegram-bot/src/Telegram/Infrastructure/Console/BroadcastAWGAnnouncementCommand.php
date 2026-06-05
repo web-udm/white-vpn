@@ -6,6 +6,8 @@ namespace App\Telegram\Infrastructure\Console;
 
 use App\Subscription\Domain\Repository\SubscriptionRepositoryInterface;
 use App\User\Domain\Repository\UserRepositoryInterface;
+use App\User\Domain\ValueObject\TelegramId;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use App\VPN\Domain\Entity\VpnConnection;
 use App\VPN\Domain\Repository\VpnConnectionRepositoryInterface;
 use App\VPN\Port\AWGPeerConfig;
@@ -26,13 +28,11 @@ final class BroadcastAWGAnnouncementCommand extends Command
     use HandleTrait;
 
     private const string ANNOUNCEMENT = <<<TEXT
-        🔐 *AmneziaWG — новый способ подключения*
+        🔐 *У нас появилась AmneziaWG — улучшенный WireGuard*
 
-        Мы добавили поддержку AmneziaWG \(обфусцированный WireGuard\) — работает там, где обычный VPN блокируется\.
+        Конфиги уже есть в "Моих подключениях": *3 файла*, по 1-му на устройство\.
 
-        Ваши персональные конфиги уже созданы: *3 файла* для разных устройств\. Получите их в разделе *«🔑 Мои подключения»*\.
-
-        ⚠️ *Старый WireGuard будет отключён в течение недели\.* Успейте подключить новый\.
+        ⚠️ *Старый WireGuard будет отключён в течение недели\.*
         TEXT;
 
     public function __construct(
@@ -41,6 +41,7 @@ final class BroadcastAWGAnnouncementCommand extends Command
         private readonly UserRepositoryInterface $userRepository,
         private readonly VpnConnectionRepositoryInterface $vpnConnectionRepository,
         MessageBusInterface $messageBus,
+        #[Autowire('%telegram.admin_id%')] private readonly int $adminTelegramId,
     ) {
         parent::__construct();
         $this->messageBus = $messageBus;
@@ -48,41 +49,40 @@ final class BroadcastAWGAnnouncementCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $subscriptions = $this->subscriptionRepository->findAllActive();
-        $total         = count($subscriptions);
-        $provisioned   = 0;
-        $notified      = 0;
-        $failed        = 0;
-
-        $output->writeln("Found {$total} active subscriptions.");
-
-        foreach ($subscriptions as $subscription) {
-            $subscriptionId = $subscription->getId();
-            if ($subscriptionId === null) {
-                continue;
-            }
-
-            $user = $this->userRepository->findById($subscription->getUserId());
-            if ($user === null) {
-                $output->writeln("  [SKIP] subscription {$subscriptionId}: user not found");
-                continue;
-            }
-
-            $telegramId = $user->getTelegramId()->value;
-
-            try {
-                $this->provisionAndNotify($subscriptionId, $telegramId, $output);
-                $provisioned++;
-                $notified++;
-            } catch (\Throwable $e) {
-                $failed++;
-                $output->writeln("  [ERROR] subscription {$subscriptionId}: {$e->getMessage()}");
-            }
-
-            usleep(100_000);
+        $adminUser = $this->userRepository->findByTelegramId(new TelegramId($this->adminTelegramId));
+        if ($adminUser === null) {
+            $output->writeln('Admin user not found.');
+            return Command::FAILURE;
         }
 
-        $output->writeln("Done. Provisioned+notified: {$notified}, failed: {$failed}.");
+        $subscriptions = $this->subscriptionRepository->findAllActive();
+        $adminUserId   = $adminUser->getId();
+
+        $adminSubscription = null;
+        foreach ($subscriptions as $subscription) {
+            if ($subscription->getUserId() === $adminUserId) {
+                $adminSubscription = $subscription;
+                break;
+            }
+        }
+
+        if ($adminSubscription === null) {
+            $output->writeln('No active subscription found for admin.');
+            return Command::FAILURE;
+        }
+
+        $subscriptionId = $adminSubscription->getId();
+        if ($subscriptionId === null) {
+            return Command::FAILURE;
+        }
+
+        try {
+            $this->provisionAndNotify($subscriptionId, $this->adminTelegramId, $output);
+            $output->writeln('Done. Admin notified.');
+        } catch (\Throwable $e) {
+            $output->writeln("ERROR: {$e->getMessage()}");
+            return Command::FAILURE;
+        }
 
         return Command::SUCCESS;
     }
