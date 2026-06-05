@@ -34,6 +34,8 @@ final class BroadcastAWGAnnouncementCommand extends Command
 
         Конфиги уже есть в "Моих подключениях": *3 файла*, по 1\-му на устройство\.
 
+        📖 [Инструкция по подключению](https://telegra.ph/Kak-podklyuchit-AmneziaWG-06-05)
+
         ⚠️ *Старый WireGuard будет отключён в течение недели\.*
         TEXT;
 
