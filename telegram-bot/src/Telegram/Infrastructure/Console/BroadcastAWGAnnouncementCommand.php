@@ -8,6 +8,7 @@ use App\Subscription\Domain\Repository\SubscriptionRepositoryInterface;
 use App\User\Domain\Repository\UserRepositoryInterface;
 use App\User\Domain\ValueObject\TelegramId;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use App\VPN\Application\Command\CreateAWGConnections\CreateAWGConnectionsCommandHandler;
 use App\VPN\Domain\Entity\VpnConnection;
 use App\VPN\Domain\Repository\VpnConnectionRepositoryInterface;
 use App\VPN\Port\AWGPeerConfig;
@@ -31,7 +32,7 @@ final class BroadcastAWGAnnouncementCommand extends Command
     private const string ANNOUNCEMENT = <<<TEXT
         🔐 *У нас появилась AmneziaWG — улучшенный WireGuard*
 
-        Конфиги уже есть в "Моих подключениях": *3 файла*, по 1-му на устройство\.
+        Конфиги уже есть в "Моих подключениях": *3 файла*, по 1\-му на устройство\.
 
         ⚠️ *Старый WireGuard будет отключён в течение недели\.*
         TEXT;
@@ -41,6 +42,7 @@ final class BroadcastAWGAnnouncementCommand extends Command
         private readonly SubscriptionRepositoryInterface $subscriptionRepository,
         private readonly UserRepositoryInterface $userRepository,
         private readonly VpnConnectionRepositoryInterface $vpnConnectionRepository,
+        private readonly CreateAWGConnectionsCommandHandler $createAWGConnectionsHandler,
         MessageBusInterface $messageBus,
         #[Autowire('%telegram.admin_id%')] private readonly int $adminTelegramId,
     ) {
@@ -126,7 +128,7 @@ final class BroadcastAWGAnnouncementCommand extends Command
         );
 
         if (count($existing) < 3) {
-            $this->messageBus->dispatch(new CreateAWGConnectionsCommand($subscriptionId));
+            ($this->createAWGConnectionsHandler)(new CreateAWGConnectionsCommand($subscriptionId));
             $output->writeln("  [OK] subscription {$subscriptionId}: peers created");
         } else {
             $output->writeln("  [SKIP] subscription {$subscriptionId}: peers already exist");
