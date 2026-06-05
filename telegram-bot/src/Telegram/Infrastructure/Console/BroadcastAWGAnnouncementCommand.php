@@ -18,6 +18,7 @@ use SergiX44\Nutgram\Telegram\Types\Internal\InputFile;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -47,44 +48,74 @@ final class BroadcastAWGAnnouncementCommand extends Command
         $this->messageBus = $messageBus;
     }
 
+    protected function configure(): void
+    {
+        $this->addOption('admin-only', null, InputOption::VALUE_NONE, 'Send only to admin (for testing)');
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $adminUser = $this->userRepository->findByTelegramId(new TelegramId($this->adminTelegramId));
-        if ($adminUser === null) {
-            $output->writeln('Admin user not found.');
-            return Command::FAILURE;
-        }
-
+        $adminOnly     = (bool) $input->getOption('admin-only');
         $subscriptions = $this->subscriptionRepository->findAllActive();
-        $adminUserId   = $adminUser->getId();
 
-        $adminSubscription = null;
-        foreach ($subscriptions as $subscription) {
-            if ($subscription->getUserId() === $adminUserId) {
-                $adminSubscription = $subscription;
-                break;
+        if ($adminOnly) {
+            $adminUser = $this->userRepository->findByTelegramId(new TelegramId($this->adminTelegramId));
+            if ($adminUser === null) {
+                $output->writeln('Admin user not found.');
+                return Command::FAILURE;
             }
+
+            $adminUserId       = $adminUser->getId();
+            $adminSubscription = null;
+            foreach ($subscriptions as $subscription) {
+                if ($subscription->getUserId() === $adminUserId) {
+                    $adminSubscription = $subscription;
+                    break;
+                }
+            }
+
+            if ($adminSubscription === null) {
+                $output->writeln('No active subscription found for admin.');
+                return Command::FAILURE;
+            }
+
+            $subscriptions = [$adminSubscription];
         }
 
-        if ($adminSubscription === null) {
-            $output->writeln('No active subscription found for admin.');
-            return Command::FAILURE;
+        $total     = count($subscriptions);
+        $notified  = 0;
+        $failed    = 0;
+
+        $output->writeln("Processing {$total} subscription(s)" . ($adminOnly ? ' [admin-only]' : '') . '.');
+
+        foreach ($subscriptions as $subscription) {
+            $subscriptionId = $subscription->getId();
+            if ($subscriptionId === null) {
+                continue;
+            }
+
+            $user = $this->userRepository->findById($subscription->getUserId());
+            if ($user === null) {
+                $output->writeln("  [SKIP] subscription {$subscriptionId}: user not found");
+                continue;
+            }
+
+            $telegramId = $user->getTelegramId()->value;
+
+            try {
+                $this->provisionAndNotify($subscriptionId, $telegramId, $output);
+                $notified++;
+            } catch (\Throwable $e) {
+                $failed++;
+                $output->writeln("  [ERROR] subscription {$subscriptionId}: {$e->getMessage()}");
+            }
+
+            usleep(100_000);
         }
 
-        $subscriptionId = $adminSubscription->getId();
-        if ($subscriptionId === null) {
-            return Command::FAILURE;
-        }
+        $output->writeln("Done. Notified: {$notified}, failed: {$failed}.");
 
-        try {
-            $this->provisionAndNotify($subscriptionId, $this->adminTelegramId, $output);
-            $output->writeln('Done. Admin notified.');
-        } catch (\Throwable $e) {
-            $output->writeln("ERROR: {$e->getMessage()}");
-            return Command::FAILURE;
-        }
-
-        return Command::SUCCESS;
+        return $failed > 0 ? Command::FAILURE : Command::SUCCESS;
     }
 
     private function provisionAndNotify(int $subscriptionId, int $telegramId, OutputInterface $output): void
