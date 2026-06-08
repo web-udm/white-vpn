@@ -80,14 +80,14 @@
             }
           ]
         },
-        "relay_hysteria": {
-          "listen": ["udp/:${RELAY_HYSTERIA_PORT}"],
+        "relay_hy2": {
+          "listen": ["udp/:${RELAY_HY2_PORT}"],
           "routes": [
             {
               "handle": [
                 {
                   "handler": "proxy",
-                  "upstreams": [{"dial": ["udp/${DEPLOY_HOST}:${RELAY_HYSTERIA_PORT}"]}]
+                  "upstreams": [{"dial": ["udp/${DEPLOY_HOST}:${RELAY_HY2_PORT}"]}]
                 }
               ]
             }
