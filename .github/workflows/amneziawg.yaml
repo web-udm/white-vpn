@@ -44,16 +44,6 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
-            PATH="$PATH:/usr/sbin:/sbin"
-
-            # wg-easy отдаёт AmneziaWG только если на хосте есть kernel-модуль,
-            # иначе молча откатывается на обычный WireGuard. Ставится один раз
-            # руками под root, см. amneziawg/README.md
-            if ! modinfo amneziawg >/dev/null 2>&1; then
-              echo "amneziawg kernel module is missing on the host, see amneziawg/README.md"
-              exit 1
-            fi
-
             cd /app/amneziawg
             docker compose pull
             docker compose down
