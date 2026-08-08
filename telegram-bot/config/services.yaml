@@ -19,5 +19,5 @@ services:
 
 
     App\VPN\Domain\AWGProviderInterface:
-        alias: App\VPN\Infrastructure\AWG\AmneziaWGProvider
+        alias: App\VPN\Infrastructure\AWG\WGEasyProvider
 

@@ -15,14 +15,15 @@ jobs:
 
       - name: Prepare config
         env:
-          AWG_PASSWORD_HASH: ${{ secrets.AWG_PASSWORD_HASH }}
+          WG_USERNAME: ${{ secrets.WG_USERNAME }}
+          WG_PASSWORD: ${{ secrets.WG_PASSWORD }}
         run: |
           mkdir -p deploy
           python3 -c "
           import os
           content = open('amneziawg/docker-compose.yaml').read()
-          escaped = os.environ['AWG_PASSWORD_HASH'].replace('\$', '\$\$')
-          content = content.replace('%%AWG_PASSWORD_HASH%%', escaped)
+          for key in ('WG_USERNAME', 'WG_PASSWORD'):
+              content = content.replace('%%' + key + '%%', os.environ[key].replace('\$', '\$\$'))
           open('deploy/docker-compose.yaml', 'w').write(content)
           "
 
@@ -44,6 +45,18 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             sysctl -w net.ipv4.ip_forward=1
+
+            # wg-easy отдаёт AmneziaWG только если на хосте есть kernel-модуль,
+            # иначе молча откатывается на обычный WireGuard
+            if ! modinfo amneziawg >/dev/null 2>&1; then
+              apt-get update
+              apt-get install -y software-properties-common python3-launchpadlib gnupg2 "linux-headers-$(uname -r)"
+              add-apt-repository -y ppa:amnezia/ppa
+              apt-get update
+              apt-get install -y amneziawg
+              modinfo amneziawg >/dev/null 2>&1 || { echo "amneziawg module build failed"; exit 1; }
+            fi
+
             cd /app/amneziawg
             docker compose pull
             docker compose down

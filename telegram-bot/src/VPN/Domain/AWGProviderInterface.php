@@ -12,8 +12,6 @@ interface AWGProviderInterface
 
     public function generateQrPngFromConfig(string $configContent): string;
 
-    public function renamePeer(string $peerId, string $name): void;
-
     public function deletePeer(string $peerId): void;
 
     /** @return array<array{id: string, name: string}> */

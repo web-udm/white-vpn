@@ -99,7 +99,7 @@ final class GetAWGConfigsQueryHandlerTest extends KernelTestCase
         $this->assertCount(3, $result);
         foreach ($result as $index => $config) {
             $this->assertInstanceOf(AWGPeerConfig::class, $config);
-            $this->assertSame(sprintf('whitevpn-%d.conf', $index + 1), $config->filename);
+            $this->assertSame(sprintf('awg-%d.conf', $index + 1), $config->filename);
             $this->assertStringContainsString('[Interface]', $config->configContent);
             $this->assertSame('fake-png-bytes', $config->qrCodePng);
         }

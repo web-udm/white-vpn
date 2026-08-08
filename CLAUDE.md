@@ -1,9 +1,33 @@
-# VPN Telegram Bot
+# WhiteVPN
+
+## О проекте
+Личный VPN-сервис на ~100 человек: несколько VPN-протоколов на своём сервере плюс
+Telegram-бот, через который люди подают заявку на подписку и получают подключения.
+
+Пользователь пишет боту → админ подтверждает заявку → бот заводит подключения в
+панелях и отдаёт их в чат (VLESS-ссылка + `.conf`-файлы с QR-кодами для AmneziaWG).
+
+**Общаемся в чате на русском.**
+
+### Что крутится на сервере
+Каждый сервис — отдельный каталог в корне репозитория со своим `docker-compose.yaml`
+и своим workflow в `.github/workflows/`. Деплой автоматический: push в `master`
+триггерит workflow по фильтру `paths`, тот копирует файлы по SSH и перезапускает compose.
+
+| Каталог | Что это |
+|---|---|
+| `telegram-bot/` | Symfony-приложение, бот (основной код) |
+| `3x-ui/` | Панель Xray: VLESS, Hysteria 2 |
+| `amneziawg/` | Панель wg-easy v15 с AmneziaWG |
+| `gateway/` | Caddy: TLS-терминация и роутинг поддоменов `*.whitevpn.tech` |
+| `relay/` | Caddy layer4 на отдельном сервере — проброс трафика на основной |
+| `mysql/` | БД для бота |
+| `ofelia/` | Планировщик задач по контейнерам |
 
 ## Стек
 - PHP 8.5 + Symfony 8.0
 - Telegram: SergiX44/Nutgram
-- БД: SQLite + Doctrine ORM (WAL mode)
+- БД: MySQL 8 + Doctrine ORM
 - Очереди: Symfony Messenger + doctrine transport
 - Деплой: Docker + docker compose
 - VCS: GitHub
