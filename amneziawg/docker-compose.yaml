@@ -2,13 +2,14 @@ services:
   wg-easy:
     image: ghcr.io/wg-easy/wg-easy:15
     container_name: wg-easy
-    network_mode: host
     restart: unless-stopped
+    ports:
+      - "51820:51820/udp"
+      # панель наружу не публикуем — до неё ходит только Caddy с host-сети
+      - "127.0.0.1:51821:51821/tcp"
     cap_add:
       - NET_ADMIN
       - SYS_MODULE
-    devices:
-      - /dev/net/tun
     volumes:
       - etc_wireguard:/etc/wireguard
       - /lib/modules:/lib/modules:ro

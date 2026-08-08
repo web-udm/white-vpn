@@ -1,9 +1,0 @@
-services:
-  ofelia:
-    image: ghcr.io/web-udm/white-vpn-ofelia:latest
-    container_name: ofelia
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./config.ini:/etc/ofelia/config.ini:ro
-    restart: unless-stopped
-    command: daemon --config /etc/ofelia/config.ini

@@ -44,17 +44,14 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
-            sysctl -w net.ipv4.ip_forward=1
+            PATH="$PATH:/usr/sbin:/sbin"
 
             # wg-easy отдаёт AmneziaWG только если на хосте есть kernel-модуль,
-            # иначе молча откатывается на обычный WireGuard
+            # иначе молча откатывается на обычный WireGuard. Ставится один раз
+            # руками под root, см. amneziawg/README.md
             if ! modinfo amneziawg >/dev/null 2>&1; then
-              apt-get update
-              apt-get install -y software-properties-common python3-launchpadlib gnupg2 "linux-headers-$(uname -r)"
-              add-apt-repository -y ppa:amnezia/ppa
-              apt-get update
-              apt-get install -y amneziawg
-              modinfo amneziawg >/dev/null 2>&1 || { echo "amneziawg module build failed"; exit 1; }
+              echo "amneziawg kernel module is missing on the host, see amneziawg/README.md"
+              exit 1
             fi
 
             cd /app/amneziawg
