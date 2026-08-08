@@ -15,6 +15,7 @@ use SergiX44\Nutgram\Telegram\Types\Internal\InputFile;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Messenger\HandleTrait;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -38,19 +39,45 @@ final class SendAWGConfigsCommand extends Command
         $this->messageBus = $messageBus;
     }
 
+    protected function configure(): void
+    {
+        $this->addOption(
+            'only',
+            null,
+            InputOption::VALUE_REQUIRED,
+            'Send only to this Telegram ID — for a canary run before the mass broadcast',
+        );
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $only          = $this->resolveOnly($input);
         $subscriptions = $this->subscriptionRepository->findAllActive();
         $total         = count($subscriptions);
         $sent          = 0;
         $skipped       = 0;
         $failed        = 0;
 
-        $output->writeln("Found {$total} active subscriptions.");
+        $output->writeln($only === null
+            ? "Found {$total} active subscriptions."
+            : "Found {$total} active subscriptions, sending only to {$only}.");
 
         foreach ($subscriptions as $subscription) {
             $subscriptionId = $subscription->getId();
             if ($subscriptionId === null) {
+                continue;
+            }
+
+            $user = $this->userRepository->findById($subscription->getUserId());
+            if ($user === null) {
+                $output->writeln("  [SKIP] #{$subscriptionId}: user not found");
+                $skipped++;
+                continue;
+            }
+
+            $telegramId = $user->getTelegramId()->value;
+
+            if ($only !== null && $telegramId !== $only) {
                 continue;
             }
 
@@ -64,15 +91,6 @@ final class SendAWGConfigsCommand extends Command
                 $skipped++;
                 continue;
             }
-
-            $user = $this->userRepository->findById($subscription->getUserId());
-            if ($user === null) {
-                $output->writeln("  [SKIP] #{$subscriptionId}: user not found");
-                $skipped++;
-                continue;
-            }
-
-            $telegramId = $user->getTelegramId()->value;
 
             try {
                 /** @var AWGPeerConfig[] $configs */
@@ -119,5 +137,20 @@ final class SendAWGConfigsCommand extends Command
             caption: 'QR для ' . $config->filename,
             chat_id: $telegramId,
         );
+    }
+
+    private function resolveOnly(InputInterface $input): ?int
+    {
+        $only = $input->getOption('only');
+
+        if ($only === null) {
+            return null;
+        }
+
+        if (!is_string($only) || !ctype_digit($only)) {
+            throw new \InvalidArgumentException('Option --only must be a numeric Telegram ID.');
+        }
+
+        return (int) $only;
     }
 }
