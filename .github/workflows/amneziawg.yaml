@@ -17,12 +17,13 @@ jobs:
         env:
           WG_USERNAME: ${{ secrets.WG_USERNAME }}
           WG_PASSWORD: ${{ secrets.WG_PASSWORD }}
+          RELAY_AWG_PORT: ${{ secrets.RELAY_AWG_PORT }}
         run: |
           mkdir -p deploy
           python3 -c "
           import os
           content = open('amneziawg/docker-compose.yaml').read()
-          for key in ('WG_USERNAME', 'WG_PASSWORD'):
+          for key in ('WG_USERNAME', 'WG_PASSWORD', 'RELAY_AWG_PORT'):
               content = content.replace('%%' + key + '%%', os.environ[key].replace('\$', '\$\$'))
           open('deploy/docker-compose.yaml', 'w').write(content)
           "
