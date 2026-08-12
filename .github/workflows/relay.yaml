@@ -51,7 +51,7 @@ jobs:
           host: ${{ secrets.RELAY_HOST }}
           username: ${{ secrets.RELAY_USER }}
           key: ${{ secrets.RELAY_SSH_KEY }}
-          source: "relay/docker-compose.yaml,relay/caddy.json.template"
+          source: "relay/docker-compose.yaml,relay/caddy.json.template,relay/nat.sh"
           target: /app
           strip_components: 0
 
