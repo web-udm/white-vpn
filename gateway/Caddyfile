@@ -1,24 +1,3 @@
-{
-	https_port 8443
-	auto_https disable_redirects
-
-	layer4 {
-		:443 {
-			@reality tls sni www.google.com
-			route @reality {
-				proxy tcp/127.0.0.1:50500
-			}
-			route {
-				proxy tcp/127.0.0.1:8443
-			}
-		}
-	}
-}
-
-:80 {
-	redir https://{host}{uri} permanent
-}
-
 bot-prod.whitevpn.tech {
 	reverse_proxy localhost:8080
 }
@@ -39,9 +18,11 @@ vpn.whitevpn.tech {
 	@grpc {
 		header Content-Type application/grpc*
 	}
+	@xhttp path /xhttp*
 	@ws    path /ws*
 
 	reverse_proxy @grpc  h2c://localhost:40002
+	reverse_proxy @xhttp localhost:50500
 	reverse_proxy @ws    localhost:56262
 }
 
